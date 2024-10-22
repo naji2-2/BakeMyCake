@@ -1,100 +1,209 @@
-#include <SFML/Graphics.hpp>
+ï»¿#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
+#include <random>
 
 using namespace sf;
 using namespace std;
 
-// °ÔÀÓ »óÅÂ¸¦ ³ªÅ¸³»´Â ¿­°ÅÇü
-enum class GameState { StartScreen, OrderScreen };
+enum class GameState {
+    StartScreen,
+    OrderScreen
+};
 
-int flavor = 0;
-string flavor[] = {"»ıÅ©¸²", "ÃÊÄÚ"};
-int topping = 0;
-string topping[] = {"µş±â", "Ã¼¸®"};
-int topping_num[] = {1, 2, 3, 4, 5, 6, 7, 8};
+wstring flavor[] = { L"ìƒí¬ë¦¼", L"ì´ˆì½”" };
+wstring topping[] = { L"ë”¸ê¸°", L"ì²´ë¦¬" };
+string topping_num[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
 int gender[] = { 1, 2 };
+int f, t, t_num;
 
-// ½ÃÀÛÈ­¸é Å¬·¡½º
+// ì‹œì‘í™”ë©´ í´ë˜ìŠ¤
 class StartScreen {
 public:
     StartScreen() {
-        // ¹è°æ ÀÌ¹ÌÁö ·Îµå
         if (!backgroundTexture.loadFromFile("Images/Start_Seen_N.png")) {
             cout << "Failed to load background image" << endl;
         }
         backgroundSprite.setTexture(backgroundTexture);
-        // ½ºÇÁ¶óÀÌÆ® Å©±â¸¦ Ã¢ Å©±â¿¡ ¸Â°Ô Á¶Á¤
         backgroundSprite.setScale(
             static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
-
-        // ¹öÆ° ÀÌ¹ÌÁö ·Îµå
         if (!buttonTexture.loadFromFile("Images/Start_Button.png")) {
             cout << "Failed to load button image" << endl;
         }
         buttonSprite.setTexture(buttonTexture);
-        buttonSprite.setPosition(1026.f, 1325.f); // ¹öÆ° ÀÌ¹ÌÁö À§Ä¡ ¼³Á¤
+        buttonSprite.setPosition(1026.f, 1325.f);
     }
 
-    // ½ÃÀÛ È­¸é ±×¸®±â
-    void draw(sf::RenderWindow& window) {
+    void draw(RenderWindow& window) {
         window.draw(backgroundSprite);
-        window.draw(buttonSprite); // ¹öÆ° ÀÌ¹ÌÁö ±×¸®±â
+        window.draw(buttonSprite);
     }
 
-    // ¹öÆ° Å¬¸¯ Ã³¸®
     bool isStartButtonPressed(Vector2i mousePos) {
         return buttonSprite.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
 private:
-    Sprite buttonSprite;                            // ¹öÆ° ÀÌ¹ÌÁö ½ºÇÁ¶óÀÌÆ®
-    Texture buttonTexture;                          // ¹öÆ° ÀÌ¹ÌÁö ÅØ½ºÃ³
-    Texture backgroundTexture;                      // ¹è°æ ÀÌ¹ÌÁö ÅØ½ºÃ³
-    Sprite backgroundSprite;                        // ¹è°æ ÀÌ¹ÌÁö ½ºÇÁ¶óÀÌÆ®
-    const Vector2u windowSize = { 2880, 1800 };     // Ã¢ Å©±â
+    Sprite buttonSprite;
+    Texture buttonTexture;
+    Texture backgroundTexture;
+    Sprite backgroundSprite;
+    const Vector2u windowSize = { 2880, 1800 };
 };
 
-// ÁÖ¹® È­¸é Å¬·¡½º
+// ì£¼ë¬¸ í™”ë©´ í´ë˜ìŠ¤
 class OrderScreen {
 public:
     OrderScreen() {
-        // ÀÌ¹ÌÁö ·Îµå
         if (!backgroundTexture.loadFromFile("Images/Order_Seen.png")) {
             cout << "Failed to load background image" << endl;
         }
         backgroundSprite.setTexture(backgroundTexture);
-        // ½ºÇÁ¶óÀÌÆ® Å©±â¸¦ Ã¢ Å©±â¿¡ ¸Â°Ô Á¶Á¤
         backgroundSprite.setScale(
             static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
+
+        random_device rd;   // ë‚œìˆ˜ ìƒì„± ê°¹ì²´
+        mt19937 gen(rd());
+        uniform_int_distribution<int> two(0, 1);
+        uniform_int_distribution<int> top(0, 7);
+
+        gender = two(gen);
+        f = two(gen);
+        t = two(gen);
+        t_num = top(gen);
+
+        if (gender == 0) {
+            if (!characterTexture.loadFromFile("Images/male.png")) {
+                cout << "Failed to load male character image" << endl;
+            }
+        }
+        else {
+            if (!characterTexture.loadFromFile("Images/female.png")) {
+                cout << "Failed to load female character image" << endl;
+            }
+        }
+        characterSprite.setTexture(characterTexture);
+        characterSprite.setPosition(250.f, 756.f);
+
+        if (!balloonTexture.loadFromFile("Images/Text_Balloon.png")) {
+            cout << "Failed to load Text Balloon image" << endl;
+        }
+        balloonSprite.setTexture(balloonTexture);
+        balloonSprite.setPosition(149.f, 136.f);
+        balloonSprite.setColor(Color(255, 255, 255, balloonAlpha));
+
+        // í°íŠ¸ ë¡œë“œ
+        if (!font.loadFromFile("Fonts/JejuGothic.ttf")) {
+            cout << "Failed to load font" << endl;
+        }
+
+        // í† í•‘ (ë”¸ê¸°, ì²´ë¦¬)
+        toppingText.setFont(font);
+        toppingText.setString(topping[t]);
+        toppingText.setCharacterSize(100);          // ê¸€ì í¬ê¸° ì„¤ì •
+        toppingText.setFillColor(Color::Red);      // ê¸€ì ìƒ‰ìƒ
+        toppingText.setPosition(260.f, 291.f);      // í…ìŠ¤íŠ¸ ìœ„ì¹˜ ì„¤ì •
+
+        balloonText1.setFont(font);
+        balloonText1.setString(L"ê°€ ë“¤ì–´ê°„ ì¼€ì´í¬ê°€ ë¨¹ê³  ì‹¶ì–´ìš”!");
+        balloonText1.setCharacterSize(96);
+        balloonText1.setFillColor(Color::Black);
+        balloonText1.setPosition(445.f, 292.f);
+
+        // ë§› (ìƒí¬ë¦¼, ì´ˆì½œë¦¿)
+        flavorText.setFont(font);
+        flavorText.setString(flavor[f]);
+        flavorText.setCharacterSize(100);
+        flavorText.setFillColor(Color::Blue);
+        if (f == 0)
+            flavorText.setPosition(300.f, 470.f);
+        else
+            flavorText.setPosition(400.f, 470.f);
+
+        ballonnText2.setFont(font);
+        ballonnText2.setString(L" ì¼€ì´í¬ì— ");
+        ballonnText2.setCharacterSize(96);
+        ballonnText2.setFillColor(Color::Black);
+        ballonnText2.setPosition(570.f, 474.f);
+
+        // í† í•‘ ê°¯ìˆ˜ (1 ~ 8)
+        topping_numText.setFont(font);
+        topping_numText.setString(topping_num[t_num]);
+        topping_numText.setCharacterSize(100);
+        topping_numText.setFillColor(Color::Red);
+        topping_numText.setPosition(960.f, 470.f);
+        ballonnText3.setFont(font);
+        ballonnText3.setString(L"ê°œ ì˜¬ë ¤ì£¼ì„¸ìš”!");
+        ballonnText3.setCharacterSize(96);
+        ballonnText3.setFillColor(Color::Black);
+        ballonnText3.setPosition(1042.f, 474.f);
     }
 
-    // ÁÖ¹® È­¸é ±×¸®±â
+    // ë§í’ì„  í˜ì´ë“œì¸ ì—…ë°ì´íŠ¸
+    void update(float deltaTime) {
+        if (balloonFadingIn) {
+            if (balloonAlpha < 255) {
+                balloonAlpha += 200 * deltaTime;
+                if (balloonAlpha > 255) balloonAlpha = 255;
+                balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(balloonAlpha)));
+            }
+        }
+    }
+
     void draw(RenderWindow& window) {
         window.draw(backgroundSprite);
+        window.draw(characterSprite);
+        window.draw(balloonSprite);
+
+        // ë§í’ì„ ì´ ì™„ì „íˆ í‘œì‹œëœ í›„ì— í…ìŠ¤íŠ¸ë¥¼ ê·¸ë¦¬ê¸°
+        if (balloonAlpha >= 255) {
+            window.draw(toppingText);
+            window.draw(balloonText1);
+            window.draw(flavorText);
+            window.draw(ballonnText2);
+            window.draw(topping_numText);
+            window.draw(ballonnText3);
+        }
+    }
+
+    void startBalloonFadeIn() {
+        balloonFadingIn = true;
     }
 
 private:
-    Texture backgroundTexture;                      // ¹è°æ ÀÌ¹ÌÁö ÅØ½ºÃ³
-    Sprite backgroundSprite;                        // ¹è°æ ÀÌ¹ÌÁö ½ºÇÁ¶óÀÌÆ®
-    const Vector2u windowSize = { 2880, 1800 };     // Ã¢ Å©±â
+    int gender = 0;
+    Texture backgroundTexture;
+    Sprite backgroundSprite;
+    Texture characterTexture;
+    Sprite characterSprite;
+    Texture balloonTexture;
+    Sprite balloonSprite;
+    float balloonAlpha = 0.0f;
+    bool balloonFadingIn = false;
+    Font font;              // í°íŠ¸ ê°ì²´
+    Text flavorText;        // ë§› (ìƒí¬ë¦¼, ì´ˆì½œë¦¿)
+    Text toppingText;       // í† í•‘ ì¢…ë¥˜ (ë”¸ê¸°, ì²´ë¦¬)
+    Text topping_numText;   // í† í•‘ê°¯ìˆ˜ (1 ~ 8)
+    Text balloonText1;      // "ì¼€ì´í¬ê°€ ë¨¹ê³ ì‹¶ì–´ìš”!"
+    Text ballonnText2;      // "ì¼€ì´í¬ì—"
+    Text ballonnText3;      // "ê°œ ì˜¬ë ¤ì£¼ì„¸ìš”!"
+    const Vector2u windowSize = { 2880, 1800 };
 };
 
-int main()
-{
-    // Ã¢ »ı¼º
+int main() {
     RenderWindow window(VideoMode(2880, 1800), "Bake My Cake!");
+    Clock clock;
 
-    // °ÔÀÓ »óÅÂ
     GameState gameState = GameState::StartScreen;
 
-    // ½ÃÀÛÈ­¸é ¹× ÁÖ¹®È­¸é °´Ã¼ »ı¼º
     StartScreen startScreen;
     OrderScreen orderScreen;
+
+    bool characterShown = false;
 
     while (window.isOpen()) {
         Event event;
@@ -103,28 +212,31 @@ int main()
                 window.close();
             }
 
-            // ¸¶¿ì½º Å¬¸¯ Ã³¸®
             if (event.type == Event::MouseButtonPressed) {
                 if (event.mouseButton.button == Mouse::Left) {
                     Vector2i mousePos = Mouse::getPosition(window);
-
-                    // °ÔÀÓ »óÅÂ°¡ StartScreenÀÏ ¶§ ¹öÆ°À» Å¬¸¯ÇÏ¸é OrderScreenÀ¸·Î »óÅÂ ÀüÈ¯
                     if (gameState == GameState::StartScreen && startScreen.isStartButtonPressed(mousePos)) {
-                        cout << "Start Game Button Pressed!" << endl;
                         gameState = GameState::OrderScreen;
+                        characterShown = true;
                     }
                 }
             }
         }
 
+        float deltaTime = clock.restart().asSeconds();
+
         window.clear();
 
-        // °ÔÀÓ »óÅÂ¿¡ µû¶ó È­¸é ±×¸®±â
         if (gameState == GameState::StartScreen) {
-            startScreen.draw(window); // ½ÃÀÛ È­¸é
+            startScreen.draw(window);
         }
         else if (gameState == GameState::OrderScreen) {
-            orderScreen.draw(window); // ÁÖ¹® È­¸é
+            orderScreen.draw(window);
+            if (characterShown) {
+                orderScreen.startBalloonFadeIn();
+                characterShown = false;
+            }
+            orderScreen.update(deltaTime);
         }
 
         window.display();
