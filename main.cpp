@@ -1,4 +1,5 @@
 ﻿#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <string>
 #include <random>
@@ -15,12 +16,13 @@ wstring flavor[] = { L"생크림", L"초코" };
 wstring topping[] = { L"딸기", L"체리" };
 string topping_num[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
 int gender[] = { 1, 2 };
-int f, t, t_num;
+int random_flavor, random_topping, random_topping_num;
 
 // 시작화면 클래스
 class StartScreen {
 public:
     StartScreen() {
+
         if (!backgroundTexture.loadFromFile("Images/Start_Seen_N.png")) {
             cout << "Failed to load background image" << endl;
         }
@@ -29,11 +31,20 @@ public:
             static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
+
         if (!buttonTexture.loadFromFile("Images/Start_Button.png")) {
             cout << "Failed to load button image" << endl;
         }
         buttonSprite.setTexture(buttonTexture);
         buttonSprite.setPosition(1026.f, 1325.f);
+
+        if (!startSoundBuffer.loadFromFile("Music/jazz-happy.mp3")) {
+            cout << "Failed to load start sound" << endl;
+        }
+        startSound.setBuffer(startSoundBuffer);
+        startSound.setLoop(true);   // 반복 재생
+        startSound.setVolume(50);
+        startSound.play();
     }
 
     void draw(RenderWindow& window) {
@@ -45,18 +56,25 @@ public:
         return buttonSprite.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
+    void stopSound() {
+        startSound.stop();
+    }
+
 private:
     Sprite buttonSprite;
     Texture buttonTexture;
     Texture backgroundTexture;
     Sprite backgroundSprite;
     const Vector2u windowSize = { 2880, 1800 };
+    SoundBuffer startSoundBuffer;
+    Sound startSound; 
 };
 
 // 주문 화면 클래스
 class OrderScreen {
 public:
     OrderScreen() {
+
         if (!backgroundTexture.loadFromFile("Images/Order_Seen.png")) {
             cout << "Failed to load background image" << endl;
         }
@@ -66,17 +84,17 @@ public:
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
 
-        random_device rd;   // 난수 생성 갹체
+        random_device rd;   // 난수 생성 객체
         mt19937 gen(rd());
         uniform_int_distribution<int> two(0, 1);
         uniform_int_distribution<int> top(0, 7);
 
-        gender = two(gen);
-        f = two(gen);
-        t = two(gen);
-        t_num = top(gen);
+        random_gender = two(gen);
+        random_flavor = two(gen);
+        random_topping = two(gen);
+        random_topping_num = top(gen);
 
-        if (gender == 0) {
+        if (random_gender == 0) {
             if (!characterTexture.loadFromFile("Images/male.png")) {
                 cout << "Failed to load male character image" << endl;
             }
@@ -103,9 +121,9 @@ public:
 
         // 토핑 (딸기, 체리)
         toppingText.setFont(font);
-        toppingText.setString(topping[t]);
+        toppingText.setString(topping[random_topping]);
         toppingText.setCharacterSize(100);          // 글자 크기 설정
-        toppingText.setFillColor(Color::Red);      // 글자 색상
+        toppingText.setFillColor(Color::Red);       // 글자 색상
         toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
 
         balloonText1.setFont(font);
@@ -116,13 +134,13 @@ public:
 
         // 맛 (생크림, 초콜릿)
         flavorText.setFont(font);
-        flavorText.setString(flavor[f]);
+        flavorText.setString(flavor[random_flavor]);
         flavorText.setCharacterSize(100);
         flavorText.setFillColor(Color::Blue);
-        if (f == 0)
-            flavorText.setPosition(300.f, 470.f);
+        if (random_flavor == 0)
+            flavorText.setPosition(300.f, 470.f);   // 생크림
         else
-            flavorText.setPosition(400.f, 470.f);
+            flavorText.setPosition(400.f, 470.f);   // 초코
 
         ballonnText2.setFont(font);
         ballonnText2.setString(L" 케이크에 ");
@@ -132,17 +150,24 @@ public:
 
         // 토핑 갯수 (1 ~ 8)
         topping_numText.setFont(font);
-        topping_numText.setString(topping_num[t_num]);
+        topping_numText.setString(topping_num[random_topping_num]);
         topping_numText.setCharacterSize(100);
         topping_numText.setFillColor(Color::Red);
         topping_numText.setPosition(960.f, 470.f);
+
         ballonnText3.setFont(font);
         ballonnText3.setString(L"개 올려주세요!");
         ballonnText3.setCharacterSize(96);
         ballonnText3.setFillColor(Color::Black);
         ballonnText3.setPosition(1042.f, 474.f);
-    }
 
+        if (!orderSoundBuffer.loadFromFile("Music/main.mp3")) {
+            cout << "Failed to load order sound" << endl;
+        }
+        orderSound.setBuffer(orderSoundBuffer);
+        orderSound.setLoop(true);
+        orderSound.setVolume(50);
+    }
     // 말풍선 페이드인 업데이트
     void update(float deltaTime) {
         if (balloonFadingIn) {
@@ -159,7 +184,7 @@ public:
         window.draw(characterSprite);
         window.draw(balloonSprite);
 
-        // 말풍선이 완전히 표시된 후에 텍스트를 그리기
+        // 말풍선이 완전히 표시된 후 텍스트 그리기
         if (balloonAlpha >= 255) {
             window.draw(toppingText);
             window.draw(balloonText1);
@@ -174,8 +199,16 @@ public:
         balloonFadingIn = true;
     }
 
+    void playSound() {
+        orderSound.play();
+    }
+
+    void stopSound() {
+        orderSound.stop();
+    }
+
 private:
-    int gender = 0;
+    int random_gender = 0;
     Texture backgroundTexture;
     Sprite backgroundSprite;
     Texture characterTexture;
@@ -184,13 +217,15 @@ private:
     Sprite balloonSprite;
     float balloonAlpha = 0.0f;
     bool balloonFadingIn = false;
-    Font font;              // 폰트 객체
-    Text flavorText;        // 맛 (생크림, 초콜릿)
-    Text toppingText;       // 토핑 종류 (딸기, 체리)
-    Text topping_numText;   // 토핑갯수 (1 ~ 8)
-    Text balloonText1;      // "케이크가 먹고싶어요!"
-    Text ballonnText2;      // "케이크에"
-    Text ballonnText3;      // "개 올려주세요!"
+    Font font;                  // 폰트 객체
+    Text flavorText;            // 맛 (생크림, 초콜릿)
+    Text toppingText;           // 토핑 종류 (딸기, 체리)
+    Text topping_numText;       // 토핑갯수 (1 ~ 8)
+    Text balloonText1;          // "케이크가 먹고싶어요!"
+    Text ballonnText2;          // "케이크에"
+    Text ballonnText3;          // "개 올려주세요!"
+    SoundBuffer orderSoundBuffer;
+    Sound orderSound;
     const Vector2u windowSize = { 2880, 1800 };
 };
 
@@ -216,6 +251,8 @@ int main() {
                 if (event.mouseButton.button == Mouse::Left) {
                     Vector2i mousePos = Mouse::getPosition(window);
                     if (gameState == GameState::StartScreen && startScreen.isStartButtonPressed(mousePos)) {
+                        startScreen.stopSound();
+                        orderScreen.playSound();
                         gameState = GameState::OrderScreen;
                         characterShown = true;
                     }
