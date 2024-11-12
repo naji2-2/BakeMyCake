@@ -40,6 +40,7 @@ public:
         buttonSprite.setTexture(buttonTexture);
         buttonSprite.setPosition(1026.f, 1325.f);
 
+        // 시작화면 배경음악
         if (!startSoundBuffer.loadFromFile("Music/jazz-happy.mp3")) {
             cout << "Failed to load start sound" << endl;
         }
@@ -47,6 +48,10 @@ public:
         startSound.setLoop(true);   // 반복 재생
         startSound.setVolume(50);   // 볼륨 설정
         startSound.play();
+    }
+
+    void update(float deltaTime) {
+        // StartScreen에서는 특별한 업데이트 로직이 없어 비워둠
     }
 
     void draw(RenderWindow& window) {
@@ -187,6 +192,7 @@ public:
         no_answer.setFillColor(Color::Black);
         no_answer.setPosition(1985.f, 1386.f);
 
+        // 주문화면 배경음악
         if (!orderSoundBuffer.loadFromFile("Music/main.mp3")) {
             cout << "Failed to load order sound" << endl;
         }
@@ -195,29 +201,29 @@ public:
         orderSound.setVolume(50);
     }
 
-    // 주문 말풍선 페이드인 업데이트
-    void oder_update(float deltaTime) {
-        if (oder_balloonFadingIn) {
-            if (oder_balloonAlpha < 255) {
-                oder_balloonAlpha += 200 * deltaTime;
-                if (oder_balloonAlpha > 255) oder_balloonAlpha = 255;
-                oder_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(oder_balloonAlpha)));
-            }
-        }
-    }
+    void update(float deltaTime) {
 
-    // 대답 말풍선 페이드인
-    void answer_update(float deltaTime) {
-        if (answer_balloonFadingIn) {
-            if (answer_balloonAlpha < 255) {
-                answer_balloonAlpha += 200 * deltaTime;
-                if (answer_balloonAlpha > 255) answer_balloonAlpha = 255;
-                answer_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(answer_balloonAlpha)));
+        // 주문 말풍선 페이드인
+        if (oder_balloonFadingIn && oder_balloonAlpha < 255) {
+            oder_balloonAlpha += 200 * deltaTime;
+            if (oder_balloonAlpha > 255) {
+                oder_balloonAlpha = 255;
+                startAnswerBalloonFadeIn();
             }
+            oder_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(oder_balloonAlpha)));
         }
+
+        // 대답 말풍선 페이드인
+        if (answer_balloonFadingIn && answer_balloonAlpha < 255) {
+            answer_balloonAlpha += 200 * deltaTime;
+            if (answer_balloonAlpha > 255) answer_balloonAlpha = 255;
+            answer_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(answer_balloonAlpha)));
+        }
+
     }
 
     void draw(RenderWindow& window) {
+
         window.draw(backgroundSprite);
         window.draw(characterSprite);
         window.draw(oder_balloonSprite);
@@ -231,13 +237,11 @@ public:
             window.draw(text2);
             window.draw(topping_numText);
             window.draw(text3);
-            startAnswerBalloonFadeIn();
         }
 
         if (answer_balloonAlpha >= 255) {
             window.draw(yes_answer);
             window.draw(no_answer);
-            // TODO: 대답 말풍선 속에 버튼을 눌러 게임으로 들어가는 기능, 손님을 돌려보내는 기능 추가
         }
 
     }
@@ -245,10 +249,17 @@ public:
     void startBalloonFadeIn() {
         oder_balloonFadingIn = true;
     }
-    
+
     void startAnswerBalloonFadeIn() {
         answer_balloonFadingIn = true;
-        answerDelayClock.restart();
+    }
+
+    bool isYesAnswerPressed(Vector2i mousePos) {
+        return yes_answer.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool isNoAnswerPressed(Vector2i mousePos) {
+        return no_answer.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
     void playSound() {
@@ -307,33 +318,36 @@ int main() {
                 window.close();
             }
 
-            if (event.type == Event::MouseButtonPressed) {
-                if (event.mouseButton.button == Mouse::Left) {
-                    Vector2i mousePos = Mouse::getPosition(window);
-                    if (gameState == GameState::StartScreen && startScreen.isStartButtonPressed(mousePos)) {
-                        startScreen.stopSound();
-                        orderScreen.playSound();
-                        gameState = GameState::OrderScreen;
-                        characterShown = true;
-                    }
+            if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                Vector2i mousePos = Mouse::getPosition(window);
+                if (gameState == GameState::StartScreen && startScreen.isStartButtonPressed(mousePos)) {
+                    startScreen.stopSound();
+                    orderScreen.playSound();
+                    gameState = GameState::OrderScreen;
+                    characterShown = true;
+                }
             }
         }
 
         float deltaTime = clock.restart().asSeconds();      // 프레임 사이의 시간 차이를 계산해 애니메이션을 일정한 속도로 보이게함
 
+        // 화면 상태에 따라 업데이트 및 드로우 호출
+        if (gameState == GameState::StartScreen) {
+            startScreen.update(deltaTime); // 현재는 필요 없지만 구조 일관성을 위해 호출
+        } else if (gameState == GameState::OrderScreen) {
+            if (characterShown) {
+                orderScreen.startBalloonFadeIn();
+                characterShown = false;
+            }
+            orderScreen.update(deltaTime);
+        }
+
         window.clear();
 
         if (gameState == GameState::StartScreen) {
             startScreen.draw(window);
-        }
-        else if (gameState == GameState::OrderScreen) {
+        } else if (gameState == GameState::OrderScreen) {
             orderScreen.draw(window);
-            if (characterShown) {
-                orderScreen.startBalloonFadeIn();
-                characterShown = false;     // 반복해서 페이드인 되는 것을 방지함
-            }
-            orderScreen.oder_update(deltaTime);
-            orderScreen.answer_update(deltaTime);
         }
 
         window.display();
