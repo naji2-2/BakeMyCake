@@ -10,7 +10,8 @@ using namespace std;
 // 현재 화면의 상태
 enum class GameState {
     StartScreen,
-    OrderScreen
+    OrderScreen,
+    MakingCakeScreen
 };
 
 wstring flavor[] = { L"생크림", L"초코" };
@@ -60,6 +61,7 @@ public:
     }
 
     bool isStartButtonPressed(Vector2i mousePos) {
+        cout << "Pressed Start Button!" << endl;
         return buttonSprite.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
@@ -91,6 +93,21 @@ public:
             static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
+
+        // 대답 버튼 초기화
+        yesAnswerButton.setSize(Vector2f(823.f, 200.f));  // 크기
+        yesAnswerButton.setPosition(1788.f, 1085.f);      // 위치
+        yesAnswerButton.setFillColor(Color(0, 0, 0, 0));  // 투명한 배경
+
+        noAnswerButton.setSize(Vector2f(823.f, 200.f));
+        noAnswerButton.setPosition(1788.f, 1333.f);
+        noAnswerButton.setFillColor(Color(0, 0, 0, 0));
+
+        //버튼 위치 확인용
+        yesAnswerButton.setOutlineThickness(2.f);
+        yesAnswerButton.setOutlineColor(Color::Green);
+        noAnswerButton.setOutlineThickness(2.f);
+        noAnswerButton.setOutlineColor(Color::Red);
 
         random_device rd;   // 난수 생성 객체
         mt19937 gen(rd());
@@ -205,7 +222,7 @@ public:
 
         // 주문 말풍선 페이드인
         if (oder_balloonFadingIn && oder_balloonAlpha < 255) {
-            oder_balloonAlpha += 200 * deltaTime;
+            oder_balloonAlpha += 220 * deltaTime;
             if (oder_balloonAlpha > 255) {
                 oder_balloonAlpha = 255;
                 startAnswerBalloonFadeIn();
@@ -215,7 +232,7 @@ public:
 
         // 대답 말풍선 페이드인
         if (answer_balloonFadingIn && answer_balloonAlpha < 255) {
-            answer_balloonAlpha += 200 * deltaTime;
+            answer_balloonAlpha += 220 * deltaTime;
             if (answer_balloonAlpha > 255) answer_balloonAlpha = 255;
             answer_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(answer_balloonAlpha)));
         }
@@ -244,6 +261,9 @@ public:
             window.draw(no_answer);
         }
 
+        window.draw(yesAnswerButton); // 임시로 Yes 버튼 드로우
+        window.draw(noAnswerButton); // 임시로 No 버튼 드로우
+
     }
 
     void startBalloonFadeIn() {
@@ -255,11 +275,11 @@ public:
     }
 
     bool isYesAnswerPressed(Vector2i mousePos) {
-        return yes_answer.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+        return yesAnswerButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
     bool isNoAnswerPressed(Vector2i mousePos) {
-        return no_answer.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+        return noAnswerButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
     void playSound() {
@@ -282,6 +302,8 @@ private:
     Texture answer_balloonTexture;
     Sprite answer_balloonSprite;
     Text answerText;
+    RectangleShape yesAnswerButton; // "오케이" 버튼
+    RectangleShape noAnswerButton;  // "나가주세요" 버튼
     float oder_balloonAlpha = 0.0f;
     float answer_balloonAlpha = 0.0f;
     bool oder_balloonFadingIn = false;
@@ -300,6 +322,36 @@ private:
     const Vector2u windowSize = { 2880, 1800 };
 };
 
+// 케이크 만들기 화면 클래스
+class MakingCakeScreen {
+public:
+    MakingCakeScreen() {
+
+        if (!backgroundTexture.loadFromFile("Images/Making_Seen.png")) {
+            cout << "Failed to load background image" << endl;
+        }
+
+        backgroundSprite.setTexture(backgroundTexture);
+        backgroundSprite.setScale(
+            static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
+            static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
+        );
+    }
+
+    void update(float deltaTime) {
+        
+    }
+
+    void draw(RenderWindow& window) {
+        window.draw(backgroundSprite);
+    }
+
+private:
+    Texture backgroundTexture;
+    Sprite backgroundSprite;
+    const Vector2u windowSize = { 2880, 1800 };
+};
+
 int main() {
     RenderWindow window(VideoMode(2880, 1800), "Bake My Cake!");
     Clock clock;
@@ -308,6 +360,7 @@ int main() {
 
     StartScreen startScreen;
     OrderScreen orderScreen;
+    MakingCakeScreen makingcakeScreen;
 
     bool characterShown = false;
 
@@ -325,6 +378,15 @@ int main() {
                     orderScreen.playSound();
                     gameState = GameState::OrderScreen;
                     characterShown = true;
+                }
+                if (gameState == GameState::OrderScreen && orderScreen.isYesAnswerPressed(mousePos)) {
+                    // TODO: 주문을 수락한 경우
+                    cout << "Pressed Oder Yes Button!" << endl;
+                    gameState = GameState::MakingCakeScreen;
+                }
+                else if (gameState == GameState::OrderScreen && orderScreen.isNoAnswerPressed(mousePos)) {
+                    // TODO: 주문을 거절한 경우
+                    cout << "Pressed Oder No Button!" << endl;
                 }
             }
         }
@@ -346,8 +408,12 @@ int main() {
 
         if (gameState == GameState::StartScreen) {
             startScreen.draw(window);
-        } else if (gameState == GameState::OrderScreen) {
+        }
+        else if (gameState == GameState::OrderScreen) {
             orderScreen.draw(window);
+        }
+        else if (gameState == GameState::MakingCakeScreen) {
+            makingcakeScreen.draw(window);
         }
 
         window.display();
