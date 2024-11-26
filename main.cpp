@@ -103,12 +103,6 @@ public:
         noAnswerButton.setPosition(1788.f, 1333.f);
         noAnswerButton.setFillColor(Color(0, 0, 0, 0));
 
-        //버튼 위치 확인용
-        yesAnswerButton.setOutlineThickness(2.f);
-        yesAnswerButton.setOutlineColor(Color::Green);
-        noAnswerButton.setOutlineThickness(2.f);
-        noAnswerButton.setOutlineColor(Color::Red);
-
         random_device rd;   // 난수 생성 객체
         mt19937 gen(rd());
         uniform_int_distribution<int> two(0, 1);
@@ -261,9 +255,6 @@ public:
             window.draw(no_answer);
         }
 
-        window.draw(yesAnswerButton); // 임시로 Yes 버튼 드로우
-        window.draw(noAnswerButton); // 임시로 No 버튼 드로우
-
     }
 
     void startBalloonFadeIn() {
@@ -336,19 +327,100 @@ public:
             static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
+
+        // 선택지 버튼
+        option1Button.setRadius(250.0f);
+        option1Button.setPosition(200.f, 471.f);
+        option1Button.setFillColor(Color(0, 0, 0, 0));
+
+        option2Button.setRadius(250.0f);
+        option2Button.setPosition(2180.f, 471.f);
+        option2Button.setFillColor(Color(0, 0, 0, 0));
+
+        // 버튼 위치 확인용
+        option1Button.setOutlineThickness(1.f);
+        option2Button.setOutlineThickness(1.f);
+        option1Button.setOutlineColor(Color::Green);
+        option2Button.setOutlineColor(Color::Red);
+
+        // 폰트 로드
+        if (!font.loadFromFile("Fonts/JejuGothic.ttf")) {
+            cout << "Failed to load font" << endl;
+        }
+
+        // 옵션 버튼
+        if (!option1Texture.loadFromFile("Images/Option_Button.png")) {
+            cout << "Failed to load option1 image" << endl;
+        }
+        option1Sprite.setTexture(option1Texture);
+        option1Sprite.setPosition(200.f, 471.f);
+
+        if (!option2Texture.loadFromFile("Images/Option_Button.png")) {
+            cout << "Failed to load option2 image" << endl;
+        }
+        option2Sprite.setTexture(option1Texture);
+        option2Sprite.setPosition(2180.f, 471.f);
+
+        // 옵션 호버 버튼
+        if (!option1hoverTexture.loadFromFile("Images/Option_Button_Hover.png")) {
+            cout << "Failed to load option1hover image" << endl;
+        }
+        option1hoverSprite.setTexture(option1hoverTexture);
+        option1hoverSprite.setPosition(120.f, 391.f);
+
+        if (!option2hoverTexture.loadFromFile("Images/Option_Button_Hover.png")) {
+            cout << "Failed to load option2hover image" << endl;
+        }
+        option2hoverSprite.setTexture(option2hoverTexture);
+        option2hoverSprite.setPosition(2100.f, 391.f);
+
+        // 화면 텍스트
+        screenText.setFont(font);
+        screenText.setString(L"케이크 만들기 화면입니다!");
+        screenText.setCharacterSize(100);
+        screenText.setFillColor(Color::White);
+        screenText.setPosition(900.f, 261.f);
     }
 
     void update(float deltaTime) {
-        
+        // TODO: 버튼이 눌렸을 때 버튼 이미지를 호버로 변경하기
     }
 
     void draw(RenderWindow& window) {
         window.draw(backgroundSprite);
+        window.draw(option1Sprite);
+        window.draw(option1Button);
+        window.draw(option2Sprite);
+        window.draw(option2Button);
+        // 버튼 호버 이미지 확인용
+        window.draw(option1hoverSprite);
+        window.draw(option2hoverSprite);
+        window.draw(screenText);
+    }
+
+    bool option1ButtonPressed(Vector2i mousePos) {
+        return option1Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool option2ButtonPressed(Vector2i mousePos) {
+        return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
 private:
     Texture backgroundTexture;
     Sprite backgroundSprite;
+    Texture option1Texture;         // 선택지 옵션
+    Sprite option1Sprite;
+    Texture option2Texture;
+    Sprite option2Sprite;
+    Texture option1hoverTexture;    // 선택지 옵션 호버
+    Sprite option1hoverSprite;
+    Texture option2hoverTexture;
+    Sprite option2hoverSprite;
+    CircleShape option1Button;      // 선택지 버튼
+    CircleShape option2Button;
+    Text screenText;                // 설명 텍스트
+    Font font;                      // 폰트 객체
     const Vector2u windowSize = { 2880, 1800 };
 };
 
