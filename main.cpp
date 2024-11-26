@@ -76,7 +76,7 @@ private:
     Sprite backgroundSprite;
     const Vector2u windowSize = { 2880, 1800 };
     SoundBuffer startSoundBuffer;
-    Sound startSound; 
+    Sound startSound;
 };
 
 // 주문 화면 클래스
@@ -142,7 +142,7 @@ public:
         answer_balloonSprite.setTexture(answer_balloonTexture);
         answer_balloonSprite.setPosition(1705.f, 900.f);
         answer_balloonSprite.setColor(Color(255, 255, 255, answer_balloonAlpha));
-        
+
         // 폰트 로드
         if (!font.loadFromFile("Fonts/JejuGothic.ttf")) {
             cout << "Failed to load font" << endl;
@@ -337,6 +337,21 @@ public:
         option2Button.setPosition(2180.f, 471.f);
         option2Button.setFillColor(Color(0, 0, 0, 0));
 
+        // 이동 버튼
+        moveLeftButton.setRadius(135.0f);
+        moveLeftButton.setPosition(133.f, 1425.f);
+        moveLeftButton.setFillColor(Color(0, 0, 0, 0));
+
+        moveRightButton.setRadius(135.0f);
+        moveRightButton.setPosition(2477.f, 1425.f);
+        moveRightButton.setFillColor(Color(0, 0, 0, 0));
+
+        // 이동 버튼 위치 확인용
+        moveLeftButton.setOutlineThickness(2.f);
+        moveLeftButton.setOutlineColor(Color::Green);
+        moveRightButton.setOutlineThickness(2.f);
+        moveRightButton.setOutlineColor(Color::Red);
+
         // 폰트 로드
         if (!font.loadFromFile("Fonts/JejuGothic.ttf")) {
             cout << "Failed to load font" << endl;
@@ -364,6 +379,19 @@ public:
             cout << "Failed to load option2hover image" << endl;
         }
 
+        // 이동 버튼
+        if (!moveLeftTexture.loadFromFile("Images/moveLeft_Button.png")) {
+            cout << "Failed to load moveLeft image" << endl;
+        }
+        moveLeftSprite.setTexture(moveLeftTexture);
+        moveLeftSprite.setPosition(133.f, 1425.f);
+
+        if (!moveRightTexture.loadFromFile("Images/moveRight_Button.png")) {
+            cout << "Failed to load moveRight image" << endl;
+        }
+        moveRightSprite.setTexture(moveRightTexture);
+        moveRightSprite.setPosition(2477.f, 1425.f);
+
         // 화면 텍스트
         screenText.setFont(font);
         screenText.setString(L"케이크 만들기 화면입니다!");
@@ -384,27 +412,34 @@ public:
 protected:
     Texture backgroundTexture;
     Sprite backgroundSprite;
-    Texture option1Texture;         // 선택지 옵션
+    Texture option1Texture;             // 선택지 옵션
     Sprite option1Sprite;
     Texture option2Texture;
     Sprite option2Sprite;
-    Texture option1hoverTexture;    // 선택지 옵션 호버
+    Texture option1hoverTexture;        // 선택지 옵션 호버
     Sprite option1hoverSprite;
     Texture option2hoverTexture;
     Sprite option2hoverSprite;
-    CircleShape option1Button;      // 선택지 버튼
+    Texture moveLeftTexture;            //  이동(왼쪽)
+    Sprite moveLeftSprite;
+    Texture moveRightTexture;           // 이동(오른쪽)
+    Sprite moveRightSprite;
+    CircleShape option1Button;          // 선택지 버튼
     CircleShape option2Button;
-    Text screenText;                // 설명 텍스트
-    Font font;                      // 폰트 객체
+    CircleShape moveLeftButton;      // 오른쪽 이동 버튼
+    CircleShape moveRightButton;     // 왼쪽 이동 버튼
+    Text screenText;                    // 설명 텍스트
+    Font font;                          // 폰트 객체
     const Vector2u windowSize = { 2880, 1800 };
 };
 
+// 맛 선택 화면
 class ChoseFlavorScreen : MakingCakeScreen {
 public:
     ChoseFlavorScreen() {
 
         screenText.setString(L"맛을 골라주세요!");
-        screenText.setPosition(1000.f, 261.f);
+        screenText.setPosition(1100.f, 261.f);
 
     }
 
@@ -443,6 +478,10 @@ public:
         window.draw(option2Button);
         window.draw(option1hoverSprite);
         window.draw(option2hoverSprite);
+        window.draw(moveLeftSprite);
+        window.draw(moveRightSprite);
+        window.draw(moveLeftButton);    // 테스트용
+        window.draw(moveRightButton);   // 테스트용
         window.draw(screenText);
     }
 
@@ -454,8 +493,16 @@ public:
         return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
+    bool moveLeftButtonPressed(Vector2i mousePos) {
+        return moveLeftButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool moveRightButtonPressed(Vector2i mousePos) {
+        return moveRightButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
 private:
-    
+
 };
 
 int main() {
@@ -471,6 +518,8 @@ int main() {
     bool characterShown = false;
     bool option1 = false;
     bool option2 = false;
+    bool moveLeft = false;
+    bool moveRight = false;
 
     while (window.isOpen()) {
         Event event;
@@ -506,6 +555,7 @@ int main() {
                     cout << "Pressed Option2 Button!" << endl;
                     option2 = true;
                 }
+
             }
         }
 
@@ -514,13 +564,15 @@ int main() {
         // 화면 상태에 따라 업데이트 및 드로우 호출
         if (gameState == GameState::StartScreen) {
             startScreen.update(deltaTime); // 현재는 필요 없지만 구조 일관성을 위해 호출
-        } else if (gameState == GameState::OrderScreen) {
+        }
+        else if (gameState == GameState::OrderScreen) {
             if (characterShown) {
                 orderScreen.startBalloonFadeIn();
                 characterShown = false;
             }
             orderScreen.update(deltaTime);
-        } else if (gameState == GameState::ChoseFlavorScreen) {
+        }
+        else if (gameState == GameState::ChoseFlavorScreen) {
             if (option1) {
                 choseflavorScreen.option1state = true;
                 choseflavorScreen.update(deltaTime);
