@@ -11,7 +11,7 @@ using namespace std;
 enum class GameState {
     StartScreen,
     OrderScreen,
-    MakingCakeScreen
+    ChoseFlavorScreen
 };
 
 wstring flavor[] = { L"생크림", L"초코" };
@@ -337,12 +337,6 @@ public:
         option2Button.setPosition(2180.f, 471.f);
         option2Button.setFillColor(Color(0, 0, 0, 0));
 
-        // 버튼 위치 확인용
-        option1Button.setOutlineThickness(1.f);
-        option2Button.setOutlineThickness(1.f);
-        option1Button.setOutlineColor(Color::Green);
-        option2Button.setOutlineColor(Color::Red);
-
         // 폰트 로드
         if (!font.loadFromFile("Fonts/JejuGothic.ttf")) {
             cout << "Failed to load font" << endl;
@@ -376,6 +370,41 @@ public:
         screenText.setCharacterSize(100);
         screenText.setFillColor(Color::White);
         screenText.setPosition(900.f, 261.f);
+
+    }
+
+    void update(float deltaTime) {
+
+    }
+
+    void draw(RenderWindow& window) {
+
+    }
+
+protected:
+    Texture backgroundTexture;
+    Sprite backgroundSprite;
+    Texture option1Texture;         // 선택지 옵션
+    Sprite option1Sprite;
+    Texture option2Texture;
+    Sprite option2Sprite;
+    Texture option1hoverTexture;    // 선택지 옵션 호버
+    Sprite option1hoverSprite;
+    Texture option2hoverTexture;
+    Sprite option2hoverSprite;
+    CircleShape option1Button;      // 선택지 버튼
+    CircleShape option2Button;
+    Text screenText;                // 설명 텍스트
+    Font font;                      // 폰트 객체
+    const Vector2u windowSize = { 2880, 1800 };
+};
+
+class ChoseFlavorScreen : MakingCakeScreen {
+public:
+    ChoseFlavorScreen() {
+
+        screenText.setString(L"맛을 골라주세요!");
+        screenText.setPosition(1000.f, 261.f);
 
     }
 
@@ -426,21 +455,7 @@ public:
     }
 
 private:
-    Texture backgroundTexture;
-    Sprite backgroundSprite;
-    Texture option1Texture;         // 선택지 옵션
-    Sprite option1Sprite;
-    Texture option2Texture;
-    Sprite option2Sprite;
-    Texture option1hoverTexture;    // 선택지 옵션 호버
-    Sprite option1hoverSprite;
-    Texture option2hoverTexture;
-    Sprite option2hoverSprite;
-    CircleShape option1Button;      // 선택지 버튼
-    CircleShape option2Button;
-    Text screenText;                // 설명 텍스트
-    Font font;                      // 폰트 객체
-    const Vector2u windowSize = { 2880, 1800 };
+    
 };
 
 int main() {
@@ -451,7 +466,7 @@ int main() {
 
     StartScreen startScreen;
     OrderScreen orderScreen;
-    MakingCakeScreen makingcakeScreen;
+    ChoseFlavorScreen choseflavorScreen;
 
     bool characterShown = false;
     bool option1 = false;
@@ -475,18 +490,18 @@ int main() {
                 if (gameState == GameState::OrderScreen && orderScreen.isYesAnswerPressed(mousePos)) {
                     // TODO: 주문을 수락한 경우
                     cout << "Pressed Oder Yes Button!" << endl;
-                    gameState = GameState::MakingCakeScreen;
+                    gameState = GameState::ChoseFlavorScreen;
                 }
                 else if (gameState == GameState::OrderScreen && orderScreen.isNoAnswerPressed(mousePos)) {
                     // TODO: 주문을 거절한 경우
                     cout << "Pressed Oder No Button!" << endl;
                 }
-                if (gameState == GameState::MakingCakeScreen && makingcakeScreen.option1ButtonPressed(mousePos)) {
+                if (gameState == GameState::ChoseFlavorScreen && choseflavorScreen.option1ButtonPressed(mousePos)) {
                     // TODO: 왼쪽 선택지를 누른경우
                     cout << "Pressed Option1 Button!" << endl;
                     option1 = true;
                 }
-                else if (gameState == GameState::MakingCakeScreen && makingcakeScreen.option2ButtonPressed(mousePos)) {
+                else if (gameState == GameState::ChoseFlavorScreen && choseflavorScreen.option2ButtonPressed(mousePos)) {
                     // TODO: 오른쪽 선택지를 누른경우
                     cout << "Pressed Option2 Button!" << endl;
                     option2 = true;
@@ -505,15 +520,15 @@ int main() {
                 characterShown = false;
             }
             orderScreen.update(deltaTime);
-        } else if (gameState == GameState::MakingCakeScreen) {
+        } else if (gameState == GameState::ChoseFlavorScreen) {
             if (option1) {
-                makingcakeScreen.option1state = true;
-                makingcakeScreen.update(deltaTime);
+                choseflavorScreen.option1state = true;
+                choseflavorScreen.update(deltaTime);
                 option1 = false;
             }
             if (option2) {
-                makingcakeScreen.option2state = true;
-                makingcakeScreen.update(deltaTime);
+                choseflavorScreen.option2state = true;
+                choseflavorScreen.update(deltaTime);
                 option2 = false;
             }
         }
@@ -526,8 +541,8 @@ int main() {
         else if (gameState == GameState::OrderScreen) {
             orderScreen.draw(window);
         }
-        else if (gameState == GameState::MakingCakeScreen) {
-            makingcakeScreen.draw(window);
+        else if (gameState == GameState::ChoseFlavorScreen) {
+            choseflavorScreen.draw(window);
         }
 
         window.display();
