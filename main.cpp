@@ -365,14 +365,10 @@ public:
         if (!option1hoverTexture.loadFromFile("Images/Option_Button_Hover.png")) {
             cout << "Failed to load option1hover image" << endl;
         }
-        option1hoverSprite.setTexture(option1hoverTexture);
-        option1hoverSprite.setPosition(120.f, 391.f);
 
         if (!option2hoverTexture.loadFromFile("Images/Option_Button_Hover.png")) {
             cout << "Failed to load option2hover image" << endl;
         }
-        option2hoverSprite.setTexture(option2hoverTexture);
-        option2hoverSprite.setPosition(2100.f, 391.f);
 
         // 화면 텍스트
         screenText.setFont(font);
@@ -380,10 +376,34 @@ public:
         screenText.setCharacterSize(100);
         screenText.setFillColor(Color::White);
         screenText.setPosition(900.f, 261.f);
+
     }
 
+    bool option1state = false;
+    bool option2state = false;
+
     void update(float deltaTime) {
-        // TODO: 버튼이 눌렸을 때 버튼 이미지를 호버로 변경하기
+
+        // 옵션 1 호버
+        if (option1state) {
+            option2hoverSprite.setColor(sf::Color(255, 255, 255, 0)); // 투명하게 함
+            option1hoverSprite.setTexture(option1hoverTexture);
+            option1hoverSprite.setPosition(120.f, 391.f);
+            option1hoverSprite.setColor(sf::Color(255, 255, 255, 255));
+            option1state = false;
+            option2state = false;
+        }
+
+        // 옵션 2 호버
+        if (option2state) {
+            option1hoverSprite.setColor(sf::Color(255, 255, 255, 0)); // 투명하게 함
+            option2hoverSprite.setTexture(option2hoverTexture);
+            option2hoverSprite.setPosition(2100.f, 391.f);
+            option2hoverSprite.setColor(sf::Color(255, 255, 255, 255));
+            option2state = false;
+            option1state = false;
+        }
+
     }
 
     void draw(RenderWindow& window) {
@@ -392,7 +412,6 @@ public:
         window.draw(option1Button);
         window.draw(option2Sprite);
         window.draw(option2Button);
-        // 버튼 호버 이미지 확인용
         window.draw(option1hoverSprite);
         window.draw(option2hoverSprite);
         window.draw(screenText);
@@ -435,6 +454,8 @@ int main() {
     MakingCakeScreen makingcakeScreen;
 
     bool characterShown = false;
+    bool option1 = false;
+    bool option2 = false;
 
     while (window.isOpen()) {
         Event event;
@@ -460,6 +481,16 @@ int main() {
                     // TODO: 주문을 거절한 경우
                     cout << "Pressed Oder No Button!" << endl;
                 }
+                if (gameState == GameState::MakingCakeScreen && makingcakeScreen.option1ButtonPressed(mousePos)) {
+                    // TODO: 왼쪽 선택지를 누른경우
+                    cout << "Pressed Option1 Button!" << endl;
+                    option1 = true;
+                }
+                else if (gameState == GameState::MakingCakeScreen && makingcakeScreen.option2ButtonPressed(mousePos)) {
+                    // TODO: 오른쪽 선택지를 누른경우
+                    cout << "Pressed Option2 Button!" << endl;
+                    option2 = true;
+                }
             }
         }
 
@@ -474,6 +505,17 @@ int main() {
                 characterShown = false;
             }
             orderScreen.update(deltaTime);
+        } else if (gameState == GameState::MakingCakeScreen) {
+            if (option1) {
+                makingcakeScreen.option1state = true;
+                makingcakeScreen.update(deltaTime);
+                option1 = false;
+            }
+            if (option2) {
+                makingcakeScreen.option2state = true;
+                makingcakeScreen.update(deltaTime);
+                option2 = false;
+            }
         }
 
         window.clear();
