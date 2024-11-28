@@ -182,7 +182,7 @@ public:
         topping_numText.setString(topping_num[random_topping_num]);
         topping_numText.setCharacterSize(100);
         topping_numText.setFillColor(Color::Red);
-        topping_numText.setPosition(960.f, 470.f);
+        topping_numText.setPosition(970.f, 470.f);
 
         text3.setFont(font);
         text3.setString(L"개 올려주세요!");
@@ -321,12 +321,17 @@ public:
         if (!backgroundTexture.loadFromFile("Images/Making_Seen.png")) {
             cout << "Failed to load background image" << endl;
         }
-
         backgroundSprite.setTexture(backgroundTexture);
         backgroundSprite.setScale(
             static_cast<float>(windowSize.x) / backgroundTexture.getSize().x,
             static_cast<float>(windowSize.y) / backgroundTexture.getSize().y
         );
+
+        if (!cakeTexture.loadFromFile("Images/BaseCake.png")) {
+            cout << "Failed to load BaseCake image" << endl;
+        }
+        cakeSprite.setTexture(cakeTexture);
+        cakeSprite.setPosition(909.f, 724.f);
 
         // 선택지 버튼
         option1Button.setRadius(250.0f);
@@ -412,6 +417,8 @@ public:
 protected:
     Texture backgroundTexture;
     Sprite backgroundSprite;
+    Texture cakeTexture;                // 기본 케이크
+    Sprite cakeSprite;
     Texture option1Texture;             // 선택지 옵션
     Sprite option1Sprite;
     Texture option2Texture;
@@ -438,6 +445,26 @@ class ChoseFlavorScreen : MakingCakeScreen {
 public:
     ChoseFlavorScreen() {
 
+        if (!creamflavorTexture.loadFromFile("Images/CreamFlavor.png")) {
+            cout << "Failed to load CreamFlavor image" << endl;
+        }
+        creamflavorSprite.setTexture(creamflavorTexture);
+        creamflavorSprite.setPosition(305.f, 566.f);
+
+        if (!chocolateflavorTexture.loadFromFile("Images/ChocolateFlavor.png")) {
+            cout << "Failed to load ChocolateFlavor image" << endl;
+        }
+        chocolateflavorSprite.setTexture(chocolateflavorTexture);
+        chocolateflavorSprite.setPosition(2283.f, 566.f);
+
+        if (!creamflavorcakeTexture.loadFromFile("Images/CreamFlavorCake.png")) {
+            cout << "Failed to load CreamFlavorCake image" << endl;
+        }
+
+        if (!chocolateflavorcakeTexture.loadFromFile("Images/ChocolateFlavorCake.png")) {
+            cout << "Failed to load ChocolateFlavorCake image" << endl;
+        }
+
         screenText.setString(L"맛을 골라주세요!");
         screenText.setPosition(1100.f, 261.f);
 
@@ -448,22 +475,32 @@ public:
 
     void update(float deltaTime) {
 
-        // 옵션 1 호버
+        // 크림 케이크 맛 선택
         if (option1state) {
-            option2hoverSprite.setColor(sf::Color(255, 255, 255, 0)); // 투명하게 함
+            cakeSprite.setColor(Color(255, 255, 255, 0));
+            chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+            option2hoverSprite.setColor(Color(255, 255, 255, 0));
             option1hoverSprite.setTexture(option1hoverTexture);
             option1hoverSprite.setPosition(120.f, 391.f);
-            option1hoverSprite.setColor(sf::Color(255, 255, 255, 255));
+            option1hoverSprite.setColor(Color(255, 255, 255, 255));
+            creamflavorcakeSprite.setTexture(creamflavorcakeTexture);
+            creamflavorcakeSprite.setPosition(909.f, 724.f);
+            creamflavorcakeSprite.setColor(Color(255, 255, 255, 255));
             option1state = false;
             option2state = false;
         }
 
-        // 옵션 2 호버
+        // 초콜릿 케이크 맛 선택
         if (option2state) {
-            option1hoverSprite.setColor(sf::Color(255, 255, 255, 0)); // 투명하게 함
+            cakeSprite.setColor(Color(255, 255, 255, 0));
+            creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+            option1hoverSprite.setColor(Color(255, 255, 255, 0));
             option2hoverSprite.setTexture(option2hoverTexture);
             option2hoverSprite.setPosition(2100.f, 391.f);
-            option2hoverSprite.setColor(sf::Color(255, 255, 255, 255));
+            option2hoverSprite.setColor(Color(255, 255, 255, 255));
+            chocolateflavorcakeSprite.setTexture(chocolateflavorcakeTexture);
+            chocolateflavorcakeSprite.setPosition(909.f, 724.f);
+            chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 255));
             option2state = false;
             option1state = false;
         }
@@ -472,16 +509,19 @@ public:
 
     void draw(RenderWindow& window) {
         window.draw(backgroundSprite);
+        window.draw(cakeSprite);
         window.draw(option1Sprite);
         window.draw(option1Button);
         window.draw(option2Sprite);
         window.draw(option2Button);
         window.draw(option1hoverSprite);
         window.draw(option2hoverSprite);
+        window.draw(chocolateflavorSprite);
+        window.draw(creamflavorSprite);
+        window.draw(creamflavorcakeSprite);
+        window.draw(chocolateflavorcakeSprite);
         window.draw(moveLeftSprite);
         window.draw(moveRightSprite);
-        window.draw(moveLeftButton);    // 테스트용
-        window.draw(moveRightButton);   // 테스트용
         window.draw(screenText);
     }
 
@@ -502,7 +542,14 @@ public:
     }
 
 private:
-
+    Texture chocolateflavorTexture;         // 초콜릿 맛
+    Sprite chocolateflavorSprite;
+    Texture creamflavorTexture;             // 생크림 맛
+    Sprite creamflavorSprite;
+    Texture chocolateflavorcakeTexture;     // 초콜릿 케이크
+    Sprite chocolateflavorcakeSprite;
+    Texture creamflavorcakeTexture;         // 생크림 케이크
+    Sprite creamflavorcakeSprite;
 };
 
 int main() {
