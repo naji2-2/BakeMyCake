@@ -577,49 +577,62 @@ int main() {
 
             if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                 Vector2i mousePos = Mouse::getPosition(window);
-                if (gameState == GameState::StartScreen && startScreen.isStartButtonPressed(mousePos)) {
-                    startScreen.stopSound();
-                    orderScreen.playSound();
-                    gameState = GameState::OrderScreen;
-                    characterShown = true;
+                switch (gameState)
+                {
+                case GameState::StartScreen:
+                    if (startScreen.isStartButtonPressed(mousePos)) {
+                        startScreen.stopSound();
+                        orderScreen.playSound();
+                        gameState = GameState::OrderScreen;
+                        characterShown = true;
+                    }
+                    break;
+                case GameState::OrderScreen:
+                    if (orderScreen.isYesAnswerPressed(mousePos)) {
+                        // 주문을 수락한 경우
+                        cout << "Pressed Oder Yes Button!" << endl;
+                        gameState = GameState::ChoseFlavorScreen;
+                    }
+                    else if ( orderScreen.isNoAnswerPressed(mousePos)) {
+                        // 주문을 거절한 경우
+                        cout << "Pressed Oder No Button!" << endl;
+                        gameState = GameState::StartScreen;
+                    }
+                    break;
+                case GameState::ChoseFlavorScreen:
+                    if (choseflavorScreen.option1ButtonPressed(mousePos)) {
+                        // 왼쪽 선택지를 누른경우
+                        cout << "Pressed Option1 Button!" << endl;
+                        option1 = true;
+                    }
+                    else if (choseflavorScreen.option2ButtonPressed(mousePos)) {
+                        // 오른쪽 선택지를 누른경우
+                        cout << "Pressed Option2 Button!" << endl;
+                        option2 = true;
+                    }
+                    break;
+                default:
+                    break;
                 }
-                if (gameState == GameState::OrderScreen && orderScreen.isYesAnswerPressed(mousePos)) {
-                    // TODO: 주문을 수락한 경우
-                    cout << "Pressed Oder Yes Button!" << endl;
-                    gameState = GameState::ChoseFlavorScreen;
-                }
-                else if (gameState == GameState::OrderScreen && orderScreen.isNoAnswerPressed(mousePos)) {
-                    // TODO: 주문을 거절한 경우
-                    cout << "Pressed Oder No Button!" << endl;
-                }
-                if (gameState == GameState::ChoseFlavorScreen && choseflavorScreen.option1ButtonPressed(mousePos)) {
-                    // TODO: 왼쪽 선택지를 누른경우
-                    cout << "Pressed Option1 Button!" << endl;
-                    option1 = true;
-                }
-                else if (gameState == GameState::ChoseFlavorScreen && choseflavorScreen.option2ButtonPressed(mousePos)) {
-                    // TODO: 오른쪽 선택지를 누른경우
-                    cout << "Pressed Option2 Button!" << endl;
-                    option2 = true;
-                }
-
             }
         }
 
         float deltaTime = clock.restart().asSeconds();      // 프레임 사이의 시간 차이를 계산해 애니메이션을 일정한 속도로 보이게함
 
         // 화면 상태에 따라 업데이트 및 드로우 호출
-        if (gameState == GameState::StartScreen) {
-            startScreen.update(deltaTime); // 현재는 필요 없지만 구조 일관성을 위해 호출
-        }
-        else if (gameState == GameState::OrderScreen) {
+        switch (gameState)
+        {
+        case GameState::StartScreen:
+            startScreen.update(deltaTime);
+            break;
+        case GameState::OrderScreen:
             if (characterShown) {
                 orderScreen.startBalloonFadeIn();
                 characterShown = false;
             }
             orderScreen.update(deltaTime);
-        }
-        else if (gameState == GameState::ChoseFlavorScreen) {
+            break;
+        case GameState::ChoseFlavorScreen:
             if (option1) {
                 choseflavorScreen.option1state = true;
                 choseflavorScreen.update(deltaTime);
@@ -630,18 +643,26 @@ int main() {
                 choseflavorScreen.update(deltaTime);
                 option2 = false;
             }
+            break;
+        default:
+            break;
         }
 
         window.clear();
 
-        if (gameState == GameState::StartScreen) {
+        switch (gameState)
+        {
+        case GameState::StartScreen:
             startScreen.draw(window);
-        }
-        else if (gameState == GameState::OrderScreen) {
+            break;
+        case GameState::OrderScreen:
             orderScreen.draw(window);
-        }
-        else if (gameState == GameState::ChoseFlavorScreen) {
+            break;
+        case GameState::ChoseFlavorScreen:
             choseflavorScreen.draw(window);
+            break;
+        default:
+            break;
         }
 
         window.display();
