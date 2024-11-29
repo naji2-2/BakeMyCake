@@ -22,6 +22,12 @@ int gender[] = { 1, 2 };
 int random_flavor, random_topping, random_topping_num;
 int customer = 1;
 
+// 사용자가 만든 케이크를 판단
+bool check_cream = false;
+bool check_chocolate = false;
+bool check_strawberry = false;
+bool check_cherry = false;
+
 // 시작화면 클래스
 class StartScreen {
 public:
@@ -577,13 +583,9 @@ public:
         }
 
         MakingCakeScreen::screenText.setString(L"토핑을 골라주세요!");
-        screenText.setPosition(904.f, 261.f);
+        screenText.setPosition(1025.f, 261.f);
 
     }
-
-    // ChoseFlavorScree에서 마지막으로 선택했던 케이크 맛을 판단
-    bool creamflavor = false;
-    bool chocolateflavor = false;
 
     bool strawberrytopping = false;
     bool cherrytopping = false;
@@ -591,7 +593,7 @@ public:
     void update(float deltaTime) {
 
         // ChoseFlavorScreen에서 설정했던 맛의 케이크 이미지를 띄움
-         if (creamflavor ) {
+         if (check_cream) {
              // 생크림 맛 케이크 이미지 띄우기
             creamflavorcakeSprite.setTexture(ChoseFlavorScreen::creamflavorcakeTexture);
             creamflavorcakeSprite.setPosition(909.f, 724.f);
@@ -626,7 +628,7 @@ public:
                 cherrytopping = false;
             }
          }
-         if (chocolateflavor) {
+         if (check_chocolate) {
              // 초콜릿맛 케이크 이미지 띄우기
              chocolateflavorcakeSprite.setTexture(ChoseFlavorScreen::chocolateflavorcakeTexture);
              chocolateflavorcakeSprite.setPosition(909.f, 724.f);
@@ -708,7 +710,6 @@ protected:
     Texture cherrytoppingTexture;
     Sprite cherrytoppingSprite;
 };
-
 
 int main() {
     RenderWindow window(VideoMode(2880, 1800), "Bake My Cake!");
@@ -820,8 +821,8 @@ int main() {
                 choseflavorScreen.creamflavorcake = true;
                 choseflavorScreen.update(deltaTime);
                 // ToppingScreen에 값 전달
-                chosetoppingScreen.chocolateflavor = false;
-                chosetoppingScreen.creamflavor = true;
+                check_chocolate = false;
+                check_cream = true;
                 // cream 초기화
                 cream = false;
             }
@@ -829,8 +830,8 @@ int main() {
                 choseflavorScreen.chocolateflavorcake = true;
                 choseflavorScreen.update(deltaTime);
                 // ToppingScreen에 값 전달
-                chosetoppingScreen.creamflavor = false;
-                chosetoppingScreen.chocolateflavor = true;
+                check_cream = false;
+                check_chocolate = true;
                 // chocolate 초기화
                 chocolate = false;
             }
@@ -839,12 +840,16 @@ int main() {
             if (strawberry) {
                 chosetoppingScreen.strawberrytopping = true;
                 chosetoppingScreen.update(deltaTime);
+                check_cherry = false;
+                check_strawberry = true;
                 // strawberry 초기화
                 strawberry = false;
             }
             if (cherry) {
                 chosetoppingScreen.cherrytopping = true;
                 chosetoppingScreen.update(deltaTime);
+                check_strawberry = false;
+                check_cherry = true;
                 // cherry 초기화
                 cherry = false;
             }
