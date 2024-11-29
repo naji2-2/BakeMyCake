@@ -27,6 +27,7 @@ bool check_cream = false;
 bool check_chocolate = false;
 bool check_strawberry = false;
 bool check_cherry = false;
+int check_toppingNum = 1;
 
 // 시작화면 클래스
 class StartScreen {
@@ -413,6 +414,21 @@ public:
 
     }
 
+    // 옵션 선택 이벤트
+    void option1hover(void) {
+        option2hoverSprite.setColor(Color(255, 255, 255, 0));
+        option1hoverSprite.setTexture(option1hoverTexture);
+        option1hoverSprite.setPosition(120.f, 391.f);
+        option1hoverSprite.setColor(Color(255, 255, 255, 255));
+    }
+
+    void option2hover(void) {
+        option1hoverSprite.setColor(Color(255, 255, 255, 0));
+        option2hoverSprite.setTexture(option2hoverTexture);
+        option2hoverSprite.setPosition(2100.f, 391.f);
+        option2hoverSprite.setColor(Color(255, 255, 255, 255));
+    }
+
     void update(float deltaTime) {
 
     }
@@ -486,10 +502,7 @@ public:
         if (creamflavorcake) {
             cakeSprite.setColor(Color(255, 255, 255, 0));
             chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
-            option2hoverSprite.setColor(Color(255, 255, 255, 0));
-            option1hoverSprite.setTexture(option1hoverTexture);
-            option1hoverSprite.setPosition(120.f, 391.f);
-            option1hoverSprite.setColor(Color(255, 255, 255, 255));
+            option1hover();
             creamflavorcakeSprite.setTexture(creamflavorcakeTexture);
             creamflavorcakeSprite.setPosition(909.f, 724.f);
             creamflavorcakeSprite.setColor(Color(255, 255, 255, 255));
@@ -500,10 +513,7 @@ public:
         if (chocolateflavorcake) {
             cakeSprite.setColor(Color(255, 255, 255, 0));
             creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
-            option1hoverSprite.setColor(Color(255, 255, 255, 0));
-            option2hoverSprite.setTexture(option2hoverTexture);
-            option2hoverSprite.setPosition(2100.f, 391.f);
-            option2hoverSprite.setColor(Color(255, 255, 255, 255));
+            option2hover();
             chocolateflavorcakeSprite.setTexture(chocolateflavorcakeTexture);
             chocolateflavorcakeSprite.setPosition(909.f, 724.f);
             chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 255));
@@ -604,10 +614,7 @@ public:
             if (strawberrytopping) {
                 // 딸기 토핑을 선택한 경우
                 cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
-                option2hoverSprite.setColor(Color(255, 255, 255, 0));
-                option1hoverSprite.setTexture(option1hoverTexture);
-                option1hoverSprite.setPosition(120.f, 391.f);
-                option1hoverSprite.setColor(Color(255, 255, 255, 255));
+                option1hover();
                 strawberrytoppingSprite.setTexture(strawberrytoppingTexture);
                 strawberrytoppingSprite.setPosition(1360.f, 899.f);
                 strawberrytoppingSprite.setColor(Color(255, 255, 255, 255));
@@ -617,10 +624,7 @@ public:
             else if (cherrytopping) {
                 // 체리 토핑을 선택한 경우
                 strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
-                option1hoverSprite.setColor(Color(255, 255, 255, 0));
-                option2hoverSprite.setTexture(option2hoverTexture);
-                option2hoverSprite.setPosition(2100.f, 391.f);
-                option2hoverSprite.setColor(Color(255, 255, 255, 255));
+                option2hover();
                 cherrytoppingSprite.setTexture(cherrytoppingTexture);
                 cherrytoppingSprite.setPosition(1360.f, 899.f);
                 cherrytoppingSprite.setColor(Color(255, 255, 255, 255));
@@ -639,10 +643,7 @@ public:
              if (strawberrytopping) {
                  // 딸기 토핑을 선택한 경우
                  cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
-                 option2hoverSprite.setColor(Color(255, 255, 255, 0));
-                 option1hoverSprite.setTexture(option1hoverTexture);
-                 option1hoverSprite.setPosition(120.f, 391.f);
-                 option1hoverSprite.setColor(Color(255, 255, 255, 255));
+                 option1hover();
                  strawberrytoppingSprite.setTexture(strawberrytoppingTexture);
                  strawberrytoppingSprite.setPosition(1360.f, 899.f);
                  strawberrytoppingSprite.setColor(Color(255, 255, 255, 255));
@@ -652,10 +653,7 @@ public:
              else if (cherrytopping) {
                  // 체리 토핑을 선택한 경우
                  strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
-                 option1hoverSprite.setColor(Color(255, 255, 255, 0));
-                 option2hoverSprite.setTexture(option2hoverTexture);
-                 option2hoverSprite.setPosition(2100.f, 391.f);
-                 option2hoverSprite.setColor(Color(255, 255, 255, 255));
+                 option2hover();
                  cherrytoppingSprite.setTexture(cherrytoppingTexture);
                  cherrytoppingSprite.setPosition(1360.f, 899.f);
                  cherrytoppingSprite.setColor(Color(255, 255, 255, 255));
@@ -710,6 +708,11 @@ protected:
     Texture cherrytoppingTexture;
     Sprite cherrytoppingSprite;
 };
+
+class ChoseToppingNumScreen : public ChoseToppingScreen {
+public:
+};
+
 
 int main() {
     RenderWindow window(VideoMode(2880, 1800), "Bake My Cake!");
