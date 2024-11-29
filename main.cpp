@@ -11,7 +11,8 @@ using namespace std;
 enum class GameState {
     StartScreen,
     OrderScreen,
-    ChoseFlavorScreen
+    ChoseFlavorScreen,
+    ChoseToppingScreen
 };
 
 wstring flavor[] = { L"생크림", L"초코" };
@@ -441,7 +442,7 @@ protected:
 };
 
 // 맛 선택 화면
-class ChoseFlavorScreen : MakingCakeScreen {
+class ChoseFlavorScreen :  public MakingCakeScreen {
 public:
     ChoseFlavorScreen() {
 
@@ -470,13 +471,13 @@ public:
 
     }
 
-    bool option1state = false;
-    bool option2state = false;
+    bool creamflavorcake = false;
+    bool chocolateflavorcake = false;
 
     void update(float deltaTime) {
 
         // 크림 케이크 맛 선택
-        if (option1state) {
+        if (creamflavorcake) {
             cakeSprite.setColor(Color(255, 255, 255, 0));
             chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
             option2hoverSprite.setColor(Color(255, 255, 255, 0));
@@ -486,12 +487,11 @@ public:
             creamflavorcakeSprite.setTexture(creamflavorcakeTexture);
             creamflavorcakeSprite.setPosition(909.f, 724.f);
             creamflavorcakeSprite.setColor(Color(255, 255, 255, 255));
-            option1state = false;
-            option2state = false;
+            creamflavorcake = false;
         }
 
         // 초콜릿 케이크 맛 선택
-        if (option2state) {
+        if (chocolateflavorcake) {
             cakeSprite.setColor(Color(255, 255, 255, 0));
             creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
             option1hoverSprite.setColor(Color(255, 255, 255, 0));
@@ -501,8 +501,7 @@ public:
             chocolateflavorcakeSprite.setTexture(chocolateflavorcakeTexture);
             chocolateflavorcakeSprite.setPosition(909.f, 724.f);
             chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 255));
-            option2state = false;
-            option1state = false;
+            chocolateflavorcake = false;
         }
 
     }
@@ -525,11 +524,11 @@ public:
         window.draw(screenText);
     }
 
-    bool option1ButtonPressed(Vector2i mousePos) {
+    bool creamflavorcakeButtonPressed(Vector2i mousePos) {
         return option1Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
-    bool option2ButtonPressed(Vector2i mousePos) {
+    bool chocolateflavorcakeButtonPressed(Vector2i mousePos) {
         return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
@@ -541,7 +540,7 @@ public:
         return moveRightButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
-private:
+protected:
     Texture chocolateflavorTexture;         // 초콜릿 맛
     Sprite chocolateflavorSprite;
     Texture creamflavorTexture;             // 생크림 맛
@@ -552,6 +551,165 @@ private:
     Sprite creamflavorcakeSprite;
 };
 
+// 토핑 선택 화면
+class ChoseToppingScreen : public ChoseFlavorScreen {
+public:
+    ChoseToppingScreen() {
+
+        if (!strawberrytoppingButtonTexture.loadFromFile("Images/Strawberry.png")) {
+            cout << "Failed to load StrawberryToppingButton image" << endl;
+        }
+        strawberrytoppingButtonSprite.setTexture(strawberrytoppingButtonTexture);
+        strawberrytoppingButtonSprite.setPosition(306.f, 566.f);
+
+        if (!cherrytoppingButtonTexture.loadFromFile("Images/Cherry.png")) {
+            cout << "Failed to load CherryToppingButton image" << endl;
+        }
+        cherrytoppingButtonSprite.setTexture(cherrytoppingButtonTexture);
+        cherrytoppingButtonSprite.setPosition(2286.f, 566.f);
+
+        if (!strawberrytoppingTexture.loadFromFile("Images/SmallStrawberry.png")) {
+            cout << "Failed to load StrawberryTopping image" << endl;
+        }
+
+        if (!cherrytoppingTexture.loadFromFile("Images/SmallCherry.png")) {
+            cout << "Failed to load CherryTopping image" << endl;
+        }
+
+        MakingCakeScreen::screenText.setString(L"토핑을 골라주세요!");
+        screenText.setPosition(904.f, 261.f);
+
+    }
+
+    // ChoseFlavorScree에서 마지막으로 선택했던 케이크 맛을 판단
+    bool creamflavor = false;
+    bool chocolateflavor = false;
+
+    bool strawberrytopping = false;
+    bool cherrytopping = false;
+
+    void update(float deltaTime) {
+
+        // ChoseFlavorScreen에서 설정했던 맛의 케이크 이미지를 띄움
+         if (creamflavor ) {
+             // 생크림 맛 케이크 이미지 띄우기
+            creamflavorcakeSprite.setTexture(ChoseFlavorScreen::creamflavorcakeTexture);
+            creamflavorcakeSprite.setPosition(909.f, 724.f);
+            creamflavorcakeSprite.setColor(Color(255, 255, 255, 255));
+            // 초콜릿맛 케이크 이미지 투명도 조정
+            chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+            // 토핑 선택
+            if (strawberrytopping) {
+                // 딸기 토핑을 선택한 경우
+                cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
+                option2hoverSprite.setColor(Color(255, 255, 255, 0));
+                option1hoverSprite.setTexture(option1hoverTexture);
+                option1hoverSprite.setPosition(120.f, 391.f);
+                option1hoverSprite.setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite.setTexture(strawberrytoppingTexture);
+                strawberrytoppingSprite.setPosition(1360.f, 899.f);
+                strawberrytoppingSprite.setColor(Color(255, 255, 255, 255));
+                // 초기화
+                strawberrytopping = false;
+            }
+            else if (cherrytopping) {
+                // 체리 토핑을 선택한 경우
+                strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
+                option1hoverSprite.setColor(Color(255, 255, 255, 0));
+                option2hoverSprite.setTexture(option2hoverTexture);
+                option2hoverSprite.setPosition(2100.f, 391.f);
+                option2hoverSprite.setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite.setTexture(cherrytoppingTexture);
+                cherrytoppingSprite.setPosition(1360.f, 899.f);
+                cherrytoppingSprite.setColor(Color(255, 255, 255, 255));
+                // 초기화
+                cherrytopping = false;
+            }
+         }
+         if (chocolateflavor) {
+             // 초콜릿맛 케이크 이미지 띄우기
+             chocolateflavorcakeSprite.setTexture(ChoseFlavorScreen::chocolateflavorcakeTexture);
+             chocolateflavorcakeSprite.setPosition(909.f, 724.f);
+             chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 255));
+             // 생크림맛 케이크 이미지 투명도 조정
+             creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+             // 토핑 선택
+             if (strawberrytopping) {
+                 // 딸기 토핑을 선택한 경우
+                 cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
+                 option2hoverSprite.setColor(Color(255, 255, 255, 0));
+                 option1hoverSprite.setTexture(option1hoverTexture);
+                 option1hoverSprite.setPosition(120.f, 391.f);
+                 option1hoverSprite.setColor(Color(255, 255, 255, 255));
+                 strawberrytoppingSprite.setTexture(strawberrytoppingTexture);
+                 strawberrytoppingSprite.setPosition(1360.f, 899.f);
+                 strawberrytoppingSprite.setColor(Color(255, 255, 255, 255));
+                 // 초기화
+                 strawberrytopping = false;
+             }
+             else if (cherrytopping) {
+                 // 체리 토핑을 선택한 경우
+                 strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
+                 option1hoverSprite.setColor(Color(255, 255, 255, 0));
+                 option2hoverSprite.setTexture(option2hoverTexture);
+                 option2hoverSprite.setPosition(2100.f, 391.f);
+                 option2hoverSprite.setColor(Color(255, 255, 255, 255));
+                 cherrytoppingSprite.setTexture(cherrytoppingTexture);
+                 cherrytoppingSprite.setPosition(1360.f, 899.f);
+                 cherrytoppingSprite.setColor(Color(255, 255, 255, 255));
+                 // 초기화
+                 cherrytopping = false;
+             }
+         }
+    }
+
+    void draw(RenderWindow& window) {
+        window.draw(backgroundSprite);
+        window.draw(option1Sprite);
+        window.draw(option1Button);
+        window.draw(option2Sprite);
+        window.draw(option2Button);
+        window.draw(option1hoverSprite);
+        window.draw(option2hoverSprite);
+        window.draw(creamflavorcakeSprite);             // 생크림 케이크
+        window.draw(chocolateflavorcakeSprite);         // 초콜릿 케이크
+        window.draw(strawberrytoppingButtonSprite);     // 딸기 (버튼에 들어갈 이미지)
+        window.draw(cherrytoppingButtonSprite);         // 체리 (버튼에 들어갈 이미지)
+        window.draw(strawberrytoppingSprite);           // 토핑 딸기
+        window.draw(cherrytoppingSprite);               // 토필 체리
+        window.draw(moveLeftSprite);
+        window.draw(moveRightSprite);
+        window.draw(screenText);
+    }
+
+    bool strawberryButtonPressed(Vector2i mousePos) {
+        return option1Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool cherryButtonPressed(Vector2i mousePos) {
+        return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool moveLeftButtonPressed(Vector2i mousePos) {
+        return moveLeftButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool moveRightButtonPressed(Vector2i mousePos) {
+        return moveRightButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+protected:
+    Texture strawberrytoppingButtonTexture;
+    Sprite strawberrytoppingButtonSprite;
+    Texture cherrytoppingButtonTexture;
+    Sprite cherrytoppingButtonSprite;
+    Texture strawberrytoppingTexture;
+    Sprite strawberrytoppingSprite;
+    Texture cherrytoppingTexture;
+    Sprite cherrytoppingSprite;
+};
+
+
 int main() {
     RenderWindow window(VideoMode(2880, 1800), "Bake My Cake!");
     Clock clock;
@@ -561,10 +719,17 @@ int main() {
     StartScreen startScreen;
     OrderScreen orderScreen;
     ChoseFlavorScreen choseflavorScreen;
+    ChoseToppingScreen chosetoppingScreen;
 
+    // oderscreen
     bool characterShown = false;
-    bool option1 = false;
-    bool option2 = false;
+    // choseflavorscreen
+    bool cream = false;
+    bool chocolate = false;
+    // chosetoppingscreen
+    bool strawberry = false;
+    bool cherry = false;
+    // 모두 사용
     bool moveLeft = false;
     bool moveRight = false;
 
@@ -577,6 +742,7 @@ int main() {
 
             if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                 Vector2i mousePos = Mouse::getPosition(window);
+
                 switch (gameState)
                 {
                 case GameState::StartScreen:
@@ -600,20 +766,37 @@ int main() {
                     }
                     break;
                 case GameState::ChoseFlavorScreen:
-                    if (choseflavorScreen.option1ButtonPressed(mousePos)) {
-                        // 왼쪽 선택지를 누른경우
-                        cout << "Pressed Option1 Button!" << endl;
-                        option1 = true;
+                    if (choseflavorScreen.creamflavorcakeButtonPressed(mousePos)) {
+                        //  생크림 맛을 선택한 경우
+                        cout << "Pressed creamflavorcake Button!" << endl;
+                        cream = true;
+                        chocolate = false;
                     }
-                    else if (choseflavorScreen.option2ButtonPressed(mousePos)) {
-                        // 오른쪽 선택지를 누른경우
-                        cout << "Pressed Option2 Button!" << endl;
-                        option2 = true;
+                    else if (choseflavorScreen.chocolateflavorcakeButtonPressed(mousePos)) {
+                        // 초콜릿 맛을 선택한 경우
+                        cout << "Pressed chocolateflavorcake Button!" << endl;
+                        chocolate = true;
+                        cream = false;
                     }
+                    if (choseflavorScreen.moveRightButtonPressed(mousePos))
+                        // 오른쪽 버튼을 이용해 화면을 전환한 경우
+                        gameState = GameState::ChoseToppingScreen;
                     break;
+                case GameState::ChoseToppingScreen:
+                    if (chosetoppingScreen.strawberryButtonPressed(mousePos)) {
+                        cout << "Pressed strawberry Button!" << endl;
+                        cherry = false;
+                        strawberry = true;
+                    }
+                    else if (chosetoppingScreen.cherryButtonPressed(mousePos)) {
+                        cout << "Pressed cherry Button!" << endl;
+                        strawberry = false;
+                        cherry = true;
+                    }
                 default:
                     break;
                 }
+
             }
         }
 
@@ -633,17 +816,39 @@ int main() {
             orderScreen.update(deltaTime);
             break;
         case GameState::ChoseFlavorScreen:
-            if (option1) {
-                choseflavorScreen.option1state = true;
+            if (cream) {
+                choseflavorScreen.creamflavorcake = true;
                 choseflavorScreen.update(deltaTime);
-                option1 = false;
+                // ToppingScreen에 값 전달
+                chosetoppingScreen.chocolateflavor = false;
+                chosetoppingScreen.creamflavor = true;
+                // cream 초기화
+                cream = false;
             }
-            if (option2) {
-                choseflavorScreen.option2state = true;
+            if (chocolate) {
+                choseflavorScreen.chocolateflavorcake = true;
                 choseflavorScreen.update(deltaTime);
-                option2 = false;
+                // ToppingScreen에 값 전달
+                chosetoppingScreen.creamflavor = false;
+                chosetoppingScreen.chocolateflavor = true;
+                // chocolate 초기화
+                chocolate = false;
             }
             break;
+        case GameState::ChoseToppingScreen:
+            if (strawberry) {
+                chosetoppingScreen.strawberrytopping = true;
+                chosetoppingScreen.update(deltaTime);
+                // strawberry 초기화
+                strawberry = false;
+            }
+            if (cherry) {
+                chosetoppingScreen.cherrytopping = true;
+                chosetoppingScreen.update(deltaTime);
+                // cherry 초기화
+                cherry = false;
+            }
+            chosetoppingScreen.update(deltaTime);
         default:
             break;
         }
@@ -660,6 +865,9 @@ int main() {
             break;
         case GameState::ChoseFlavorScreen:
             choseflavorScreen.draw(window);
+            break;
+        case GameState::ChoseToppingScreen:
+            chosetoppingScreen.draw(window);
             break;
         default:
             break;
