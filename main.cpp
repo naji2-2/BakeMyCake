@@ -12,7 +12,8 @@ enum class GameState {
     StartScreen,
     OrderScreen,
     ChoseFlavorScreen,
-    ChoseToppingScreen
+    ChoseToppingScreen,
+    ChoseToppingNumScreen
 };
 
 wstring flavor[] = { L"생크림", L"초코" };
@@ -414,14 +415,14 @@ public:
 
     }
 
-    // 옵션 선택 이벤트
+    // 옵션1 선택 이벤트
     void option1hover(void) {
         option2hoverSprite.setColor(Color(255, 255, 255, 0));
         option1hoverSprite.setTexture(option1hoverTexture);
         option1hoverSprite.setPosition(120.f, 391.f);
         option1hoverSprite.setColor(Color(255, 255, 255, 255));
     }
-
+    // 옵션2 선택 이벤트
     void option2hover(void) {
         option1hoverSprite.setColor(Color(255, 255, 255, 0));
         option2hoverSprite.setTexture(option2hoverTexture);
@@ -435,6 +436,14 @@ public:
 
     void draw(RenderWindow& window) {
 
+    }
+
+    bool moveLeftButtonPressed(Vector2i mousePos) {
+        return moveLeftButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool moveRightButtonPressed(Vector2i mousePos) {
+        return moveRightButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
 protected:
@@ -493,39 +502,35 @@ public:
 
     }
 
+    // 생크림 케이크 선택 이벤트
     void creamcake(void) {
+        chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
         creamflavorcakeSprite.setTexture(creamflavorcakeTexture);
         creamflavorcakeSprite.setPosition(909.f, 724.f);
         creamflavorcakeSprite.setColor(Color(255, 255, 255, 255));
     }
-
+    // 초콜릿 케이크 선택 이벤트
     void chocolatecake(void) {
+        creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
         chocolateflavorcakeSprite.setTexture(chocolateflavorcakeTexture);
         chocolateflavorcakeSprite.setPosition(909.f, 724.f);
         chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 255));
     }
 
-    bool creamflavorcake = false;
-    bool chocolateflavorcake = false;
-
     void update(float deltaTime) {
 
         // 크림 케이크 맛 선택
-        if (creamflavorcake) {
+        if (check_cream) {
             cakeSprite.setColor(Color(255, 255, 255, 0));
-            chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
             option1hover();
             creamcake();
-            creamflavorcake = false;
         }
 
         // 초콜릿 케이크 맛 선택
-        if (chocolateflavorcake) {
+        if (check_chocolate) {
             cakeSprite.setColor(Color(255, 255, 255, 0));
-            creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
             option2hover();
             chocolatecake();
-            chocolateflavorcake = false;
         }
 
     }
@@ -543,7 +548,7 @@ public:
         window.draw(creamflavorSprite);
         window.draw(creamflavorcakeSprite);
         window.draw(chocolateflavorcakeSprite);
-        window.draw(moveLeftSprite);
+        //window.draw(moveLeftSprite);
         window.draw(moveRightSprite);
         window.draw(screenText);
     }
@@ -554,14 +559,6 @@ public:
 
     bool chocolateflavorcakeButtonPressed(Vector2i mousePos) {
         return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
-    }
-
-    bool moveLeftButtonPressed(Vector2i mousePos) {
-        return moveLeftButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
-    }
-
-    bool moveRightButtonPressed(Vector2i mousePos) {
-        return moveRightButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
 protected:
@@ -605,68 +602,50 @@ public:
 
     }
 
+    // 딸기 토핑 선택 이벤트
     void strawberry(void) {
+        cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
         strawberrytoppingSprite.setTexture(strawberrytoppingTexture);
         strawberrytoppingSprite.setPosition(1360.f, 899.f);
         strawberrytoppingSprite.setColor(Color(255, 255, 255, 255));
     }
-
+    // 체리 토핑 선택 이벤트
     void cherry(void) {
+        strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
         cherrytoppingSprite.setTexture(cherrytoppingTexture);
         cherrytoppingSprite.setPosition(1360.f, 899.f);
         cherrytoppingSprite.setColor(Color(255, 255, 255, 255));
     }
 
-    bool strawberrytopping = false;
-    bool cherrytopping = false;
-
     void update(float deltaTime) {
-
-        // ChoseFlavorScreen에서 설정했던 맛의 케이크 이미지를 띄움
+        
+        // 부모 클래스에서 선택했던 케이크 상황으로 설정
          if (check_cream) {
-             // 생크림 맛 케이크 이미지 띄우기
-             creamcake();
-            // 초콜릿맛 케이크 이미지 투명도 조정
-            chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+             creamcake();   // 생크림 맛 케이크 이미지 띄우기
             // 토핑 선택
-            if (strawberrytopping) {
+            if (check_strawberry) {
                 // 딸기 토핑을 선택한 경우
-                cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
                 option1hover();
                 strawberry();
-                // 초기화
-                strawberrytopping = false;
             }
-            else if (cherrytopping) {
+            if (check_cherry) {
                 // 체리 토핑을 선택한 경우
-                strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
                 option2hover();
                 cherry();
-                // 초기화
-                cherrytopping = false;
             }
          }
          if (check_chocolate) {
-             // 초콜릿맛 케이크 이미지 띄우기
-             chocolatecake();
-             // 생크림맛 케이크 이미지 투명도 조정
-             creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+             chocolatecake();   // 초콜릿맛 케이크 이미지 띄우기
              // 토핑 선택
-             if (strawberrytopping) {
+             if (check_strawberry) {
                  // 딸기 토핑을 선택한 경우
-                 cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
                  option1hover();
                  strawberry();
-                 // 초기화
-                 strawberrytopping = false;
              }
-             else if (cherrytopping) {
+             if (check_cherry) {
                  // 체리 토핑을 선택한 경우
-                 strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
                  option2hover();
                  cherry();
-                 // 초기화
-                 cherrytopping = false;
              }
          }
     }
@@ -698,13 +677,6 @@ public:
         return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
     }
 
-    bool moveLeftButtonPressed(Vector2i mousePos) {
-        return moveLeftButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
-    }
-
-    bool moveRightButtonPressed(Vector2i mousePos) {
-        return moveRightButton.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
-    }
 
 protected:
     Texture strawberrytoppingButtonTexture;
@@ -717,10 +689,336 @@ protected:
     Sprite cherrytoppingSprite;
 };
 
+// 토핑 갯수 선택 화면
 class ChoseToppingNumScreen : public ChoseToppingScreen {
+    // TODO: 옵션 버튼을 클릭하면 토핑갯수가 증감되도록 설정 플러스 모양, 마이너스모양 이미지 추가하기
+    // 토핑 갯수에 따라 달라지는 토핑이미지를 어떻게 표현할 건지 생각(아니면 그냥 토핑 갯수별로 메서드 여러개 만들기)
+    // 텍스트 : 토핑 갯수를 골라주세요! or 토핑 갯수는?
+    // 이동 버튼 구현하기
+    // 토핑 갯수까지 선택한 후 점수 매기는 기능 만들기
 public:
-};
+    ChoseToppingNumScreen() {
 
+        if (!toppingplusButtonTexture.loadFromFile("Images/Topping_Plus.png")) {
+            cout << "Failed to load Topping Plus image" << endl;
+        }
+        toppingplusButtonSprite.setTexture(toppingplusButtonTexture);
+        toppingplusButtonSprite.setPosition(2305.f, 596.f);
+        
+        if (!toppingminusButtonTexture.loadFromFile("Images/Topping_Minus.png")) {
+            cout << "Failed to load Topping Minus image" << endl;
+        }
+        toppingminusButtonSprite.setTexture(toppingminusButtonTexture);
+        toppingminusButtonSprite.setPosition(323.f, 596.f);
+
+        // 딸기 토핑 이미지 초기화
+        for (int i = 0; i < 8; i++) {
+            strawberrytoppingSprite[i].setTexture(strawberrytoppingTexture);
+        }
+
+        // 체리 토핑 이미지 초기화
+        for (int i = 0; i < 8; i++) {
+            cherrytoppingSprite[i].setTexture(cherrytoppingTexture);
+        }
+
+        MakingCakeScreen::screenText.setString(L"토핑을 갯수를 정해주세요!");
+        screenText.setPosition(880.f, 261.f);
+
+    }
+
+    // 토핑 수를 줄일때 필요없는 토핑 이미지의 투명도 조정
+    void removetopping(int toppingnum) {
+        for (int i = toppingnum; i < 8; i++) {
+            if(check_strawberry) strawberrytoppingSprite[i].setColor(Color(255, 255, 255, 0));
+            if(check_cherry) cherrytoppingSprite[i].setColor(Color(255, 255, 255, 0));
+        }
+    }
+    
+    // 토핑 갯수에 맞게 이미지를 띄우기
+    void toppingNum(void) {
+        switch (check_toppingNum)
+        {
+        case 1:
+            if (check_strawberry) {
+                removetopping(1);
+                strawberrytoppingSprite[0].setPosition(1360.f, 899.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(1);
+                cherrytoppingSprite[0].setPosition(1360.f, 899.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 2:
+            if (check_strawberry) {
+                removetopping(2);
+                strawberrytoppingSprite[0].setPosition(1262.f, 899.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1471.f, 899.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(2);
+                cherrytoppingSprite[0].setPosition(1262.f, 899.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1471.f, 899.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 3:
+            if (check_strawberry) {
+                removetopping(3);
+                strawberrytoppingSprite[0].setPosition(1160.f, 899.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1369.f, 899.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[2].setPosition(1578.f, 899.f);
+                strawberrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(3);
+                cherrytoppingSprite[0].setPosition(1160.f, 899.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1369.f, 899.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[2].setPosition(1578.f, 899.f);
+                cherrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 4:
+            if (check_strawberry) {
+                removetopping(4);
+                strawberrytoppingSprite[0].setPosition(1004.f, 899.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1369.f, 738.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[2].setPosition(1360.f, 1044.f);
+                strawberrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[3].setPosition(1705.f, 899.f);
+                strawberrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(4);
+                cherrytoppingSprite[0].setPosition(1004.f, 899.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1369.f, 738.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[2].setPosition(1360.f, 1044.f);
+                cherrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[3].setPosition(1705.f, 899.f);
+                cherrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 5:
+            if (check_strawberry) {
+                removetopping(5);
+                strawberrytoppingSprite[0].setPosition(1083.f, 828.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1360.f, 756.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[2].setPosition(1655.f, 828.f);
+                strawberrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[3].setPosition(1504.f, 1010.f);
+                strawberrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[4].setPosition(1216.f, 1010.f);
+                strawberrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(5);
+                cherrytoppingSprite[0].setPosition(1083.f, 828.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1360.f, 756.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[2].setPosition(1655.f, 828.f);
+                cherrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[3].setPosition(1504.f, 1010.f);
+                cherrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[4].setPosition(1216.f, 1010.f);
+                cherrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 6:
+            if (check_strawberry) {
+                removetopping(6);
+                strawberrytoppingSprite[0].setPosition(1098.f, 782.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1360.f, 721.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[2].setPosition(1622.f, 756.f);
+                strawberrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[3].setPosition(1666.f, 971.f);
+                strawberrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[4].setPosition(1360.f, 1044.f);
+                strawberrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[5].setPosition(1072.f, 971.f);
+                strawberrytoppingSprite[5].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(6);
+                cherrytoppingSprite[0].setPosition(1098.f, 782.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1360.f, 721.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[2].setPosition(1622.f, 756.f);
+                cherrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[3].setPosition(1666.f, 971.f);
+                cherrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[4].setPosition(1360.f, 1044.f);
+                cherrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[5].setPosition(1072.f, 971.f);;
+                cherrytoppingSprite[5].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 7:
+            if (check_strawberry) {
+                removetopping(7);
+                strawberrytoppingSprite[0].setPosition(1103.f, 782.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1367.f, 736.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[2].setPosition(1631.f, 782.f);
+                strawberrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[3].setPosition(1727.f, 963.f);
+                strawberrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[4].setPosition(1487.f, 1045.f);
+                strawberrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[5].setPosition(1247.f, 1045.f);
+                strawberrytoppingSprite[5].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[6].setPosition(1007.f, 963.f);
+                strawberrytoppingSprite[6].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(7);
+                cherrytoppingSprite[0].setPosition(1103.f, 782.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1367.f, 736.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[2].setPosition(1631.f, 782.f);
+                cherrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[3].setPosition(1727.f, 963.f);
+                cherrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[4].setPosition(1487.f, 1045.f);
+                cherrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[5].setPosition(1247.f, 1045.f);
+                cherrytoppingSprite[5].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[6].setPosition(1007.f, 963.f);
+                cherrytoppingSprite[6].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        case 8:
+            if (check_strawberry) {
+                removetopping(8);
+                strawberrytoppingSprite[0].setPosition(1010.f, 901.f);
+                strawberrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[1].setPosition(1154.f, 756.f);
+                strawberrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[2].setPosition(1369.f, 756.f);
+                strawberrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[3].setPosition(1584.f, 756.f);
+                strawberrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[4].setPosition(1584.f, 1045.f);
+                strawberrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[5].setPosition(1369.f, 1071.f);
+                strawberrytoppingSprite[5].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[6].setPosition(1154.f, 1045.f);
+                strawberrytoppingSprite[6].setColor(Color(255, 255, 255, 255));
+                strawberrytoppingSprite[7].setPosition(1728.f, 901.f);
+                strawberrytoppingSprite[7].setColor(Color(255, 255, 255, 255));
+            }
+            if (check_cherry) {
+                removetopping(8);
+                cherrytoppingSprite[0].setPosition(1010.f, 901.f);
+                cherrytoppingSprite[0].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[1].setPosition(1154.f, 756.f);
+                cherrytoppingSprite[1].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[2].setPosition(1369.f, 756.f);
+                cherrytoppingSprite[2].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[3].setPosition(1584.f, 756.f);
+                cherrytoppingSprite[3].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[4].setPosition(1584.f, 1045.f);
+                cherrytoppingSprite[4].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[5].setPosition(1369.f, 1071.f);
+                cherrytoppingSprite[5].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[6].setPosition(1154.f, 1045.f);
+                cherrytoppingSprite[6].setColor(Color(255, 255, 255, 255));
+                cherrytoppingSprite[7].setPosition(1728.f, 901.f);
+                cherrytoppingSprite[7].setColor(Color(255, 255, 255, 255));
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    void update(float deltaTime) {
+
+        // 부모 클래스에서 선택했던 케이크 상황으로 설정
+        if (check_cream) {
+            creamcake();    // 생크림 맛 케이크 이미지 띄우기
+            // 토핑 선택
+            if (check_strawberry) {
+                // 딸기 토핑을 선택한 경우
+                toppingNum();
+            }
+            else if (check_cherry) {
+                // 체리 토핑을 선택한 경우
+                toppingNum();
+            }
+        }
+        if (check_chocolate) {
+            // 초콜릿 케이크를 선택한 경우
+            chocolatecake();    // 초콜릿맛 케이크 이미지 띄우기
+            // 토핑 선택
+            if (check_strawberry) {
+                // 딸기 토핑을 선택한 경우
+                toppingNum();
+            }
+            else if (check_cherry) {
+                // 체리 토핑을 선택한 경우
+                toppingNum();
+            }
+        }
+    }
+
+    void draw(RenderWindow& window) {
+        window.draw(backgroundSprite);
+        window.draw(option1Sprite);
+        window.draw(option1Button);
+        window.draw(option2Sprite);
+        window.draw(option2Button);
+        window.draw(toppingplusButtonSprite);
+        window.draw(toppingminusButtonSprite);
+        window.draw(creamflavorcakeSprite);             // 생크림 케이크
+        window.draw(chocolateflavorcakeSprite);         // 초콜릿 케이크
+        for (int i = 0; i < 8; i++) {
+            if(check_strawberry) window.draw(strawberrytoppingSprite[i]);    // 딸기 토핑
+            if (check_cherry) window.draw(cherrytoppingSprite[i]);           // 체리 토핑
+        }
+        window.draw(moveLeftSprite);
+        window.draw(moveRightSprite);
+        window.draw(screenText);
+    }
+
+    bool minusButtonPressed(Vector2i mousePos) {
+        return option1Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+    bool plusButtonPressed(Vector2i mousePos) {
+        return option2Button.getGlobalBounds().contains(static_cast<Vector2f>(mousePos));
+    }
+
+protected:
+    Texture toppingplusButtonTexture;
+    Sprite toppingplusButtonSprite;
+    Texture toppingminusButtonTexture;
+    Sprite toppingminusButtonSprite;
+    // 딸기 토핑 8개 스프라이트
+    Sprite strawberrytoppingSprite[8];
+    // 체리 토핑 8개 스프라이트
+    Sprite cherrytoppingSprite[8];
+
+};
 
 int main() {
     RenderWindow window(VideoMode(2880, 1800), "Bake My Cake!");
@@ -730,8 +1028,10 @@ int main() {
 
     StartScreen startScreen;
     OrderScreen orderScreen;
+    MakingCakeScreen makingScreen;
     ChoseFlavorScreen choseflavorScreen;
     ChoseToppingScreen chosetoppingScreen;
+    ChoseToppingNumScreen chosetoppingnumScreen;
 
     // oderscreen
     bool characterShown = false;
@@ -790,7 +1090,7 @@ int main() {
                         chocolate = true;
                         cream = false;
                     }
-                    if (choseflavorScreen.moveRightButtonPressed(mousePos))
+                    if (makingScreen.moveRightButtonPressed(mousePos))
                         // 오른쪽 버튼을 이용해 화면을 전환한 경우
                         gameState = GameState::ChoseToppingScreen;
                     break;
@@ -805,6 +1105,28 @@ int main() {
                         strawberry = false;
                         cherry = true;
                     }
+                    if (makingScreen.moveRightButtonPressed(mousePos))
+                        // 오른쪽 버튼을 이용해 화면을 전환한 경우
+                        gameState = GameState::ChoseToppingNumScreen;
+                    if (makingScreen.moveLeftButtonPressed(mousePos))
+                        // 왼쪽 버튼을 이용해 화면을 전환한 경우
+                        gameState = GameState::ChoseFlavorScreen;
+                    break;
+                case GameState::ChoseToppingNumScreen:
+                    if (chosetoppingnumScreen.plusButtonPressed(mousePos)) {
+                        if (check_toppingNum < 8)
+                            check_toppingNum++;
+                        cout << "ToppingNum : " << check_toppingNum << endl;
+                    }
+                    if (chosetoppingnumScreen.minusButtonPressed(mousePos)) {
+                        if (check_toppingNum > 1)
+                            check_toppingNum--;
+                        cout << "ToppingNum : " << check_toppingNum << endl;
+                    }
+                    if (makingScreen.moveLeftButtonPressed(mousePos))
+                        // 왼쪽 버튼을 이용해 화면을 전환한 경우
+                        gameState = GameState::ChoseToppingScreen;
+                    break;
                 default:
                     break;
                 }
@@ -829,42 +1151,41 @@ int main() {
             break;
         case GameState::ChoseFlavorScreen:
             if (cream) {
-                choseflavorScreen.creamflavorcake = true;
-                choseflavorScreen.update(deltaTime);
-                // ToppingScreen에 값 전달
+                // 케이크 맛을 크림으로 변경
                 check_chocolate = false;
                 check_cream = true;
                 // cream 초기화
                 cream = false;
             }
             if (chocolate) {
-                choseflavorScreen.chocolateflavorcake = true;
-                choseflavorScreen.update(deltaTime);
-                // ToppingScreen에 값 전달
+                // 케이크 맛을 초콜릿으로 변경
                 check_cream = false;
                 check_chocolate = true;
                 // chocolate 초기화
                 chocolate = false;
             }
+            choseflavorScreen.update(deltaTime);
             break;
         case GameState::ChoseToppingScreen:
             if (strawberry) {
-                chosetoppingScreen.strawberrytopping = true;
-                chosetoppingScreen.update(deltaTime);
+                // 토핑 상태를 딸기로 변경
                 check_cherry = false;
                 check_strawberry = true;
                 // strawberry 초기화
                 strawberry = false;
             }
             if (cherry) {
-                chosetoppingScreen.cherrytopping = true;
-                chosetoppingScreen.update(deltaTime);
+                // 토핑 상태를 체리로 변경
                 check_strawberry = false;
                 check_cherry = true;
                 // cherry 초기화
                 cherry = false;
             }
             chosetoppingScreen.update(deltaTime);
+            break;
+        case GameState::ChoseToppingNumScreen:
+            chosetoppingnumScreen.update(deltaTime);
+            break;
         default:
             break;
         }
@@ -884,6 +1205,9 @@ int main() {
             break;
         case GameState::ChoseToppingScreen:
             chosetoppingScreen.draw(window);
+            break;
+        case GameState::ChoseToppingNumScreen:
+            chosetoppingnumScreen.draw(window);
             break;
         default:
             break;
