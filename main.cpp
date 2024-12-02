@@ -24,11 +24,6 @@ wstring topping[] = { L"딸기", L"체리" };
 string topping_num[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
 int gender[] = { 1, 2 };
 
-// 랜덤으로 주문을 받을 수 있게하는 변수
-int random_gender = 0;
-int random_flavor, random_topping, random_topping_num;
-int customer = 1;
-
 // main 함수에서 update를 위해 필요한 변수
 bool characterShown = false;
 bool cream = false;
@@ -50,6 +45,17 @@ bool check_chocolate = false;
 bool check_strawberry = false;
 bool check_cherry = false;
 int check_toppingNum = 1;
+
+// 손님의 주문을 저장하는 구조체
+struct Order {
+    int gender; // 0: 남자, 1: 여자
+    int flavor; // 케이크 맛
+    int topping; // 토핑 종류
+    int toppingNum; // 토핑 개수
+};
+
+// 현재 주문을 저장하는 전역 변수
+Order currentOrder;
 
 // 게임 재시작을 위해 변수를 초기화하는 메서드
 void resetGame(void) {
@@ -217,13 +223,13 @@ public:
         no_answer.setFillColor(Color(255, 255, 255, 0));
 
         // 손님의 정보와, 주문받을 케이크의 정보를 랜덤으로 설정
-        random_gender = two(gen);
-        random_flavor = two(gen);
-        random_topping = two(gen);
-        random_topping_num = top(gen);
+        currentOrder.gender = two(gen); // 0: 남자, 1: 여자
+        currentOrder.flavor = two(gen);
+        currentOrder.topping = two(gen);
+        currentOrder.toppingNum = top(gen);
 
         // 손님 이미지를 랜덤으로 설정 (0: 남자, 1: 여자)
-        if (random_gender == 0) {
+        if (currentOrder.gender == 0) {
             if (!characterTexture.loadFromFile("Images/male.png")) {
                 cout << "Failed to load male character image" << endl;
             }
@@ -253,7 +259,7 @@ public:
         // 말풍선이 완전히 표시된 후 텍스트 그리기
         if (oder_balloonAlpha >= 255) {
             // 토핑 (딸기, 체리)
-            toppingText.setString(topping[random_topping]);
+            toppingText.setString(topping[currentOrder.topping]);
             toppingText.setCharacterSize(100);          // 글자 크기 설정
             toppingText.setFillColor(Color::Red);       // 글자 색상
             toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
@@ -263,7 +269,7 @@ public:
             text1.setPosition(445.f, 292.f);
 
             // 맛 (생크림, 초콜릿)
-            flavorText.setString(flavor[random_flavor]);
+            flavorText.setString(flavor[currentOrder.flavor]);
             flavorText.setCharacterSize(100);
             flavorText.setFillColor(Color::Blue);
             flavorText.setPosition(300.f, 470.f);   // 생크림
@@ -273,7 +279,7 @@ public:
             text2.setPosition(570.f, 474.f);
 
             // 토핑 갯수 (1 ~ 8)
-            topping_numText.setString(topping_num[random_topping_num]);
+            topping_numText.setString(topping_num[currentOrder.toppingNum]);
             topping_numText.setCharacterSize(100);
             topping_numText.setFillColor(Color::Red);
             topping_numText.setPosition(970.f, 470.f);
@@ -281,7 +287,7 @@ public:
             text3.setCharacterSize(96);
             text3.setFillColor(Color::Black);
             text3.setPosition(1042.f, 474.f);// 토핑 (딸기, 체리)
-            toppingText.setString(topping[random_topping]);
+            toppingText.setString(topping[currentOrder.topping]);
             toppingText.setCharacterSize(100);          // 글자 크기 설정
             toppingText.setFillColor(Color::Red);       // 글자 색상
             toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
@@ -291,7 +297,7 @@ public:
             text1.setPosition(445.f, 292.f);
 
             // 맛 (생크림, 초콜릿)
-            flavorText.setString(flavor[random_flavor]);
+            flavorText.setString(flavor[currentOrder.flavor]);
             flavorText.setCharacterSize(100);
             flavorText.setFillColor(Color::Blue);
             flavorText.setPosition(300.f, 470.f);   // 생크림
@@ -301,7 +307,7 @@ public:
             text2.setPosition(570.f, 474.f);
 
             // 토핑 갯수 (1 ~ 8)
-            topping_numText.setString(topping_num[random_topping_num]);
+            topping_numText.setString(topping_num[currentOrder.toppingNum]);
             topping_numText.setCharacterSize(100);
             topping_numText.setFillColor(Color::Red);
             topping_numText.setPosition(970.f, 470.f);
@@ -1151,7 +1157,7 @@ public:
         );
 
         // 손님 이미지 (0: 남자, 1: 여자)
-        if (random_gender == 0) {
+        if (currentOrder.gender == 0) {
             if (!characterTexture.loadFromFile("Images/male.png")) {
                 cout << "Failed to load male character image" << endl;
             }
@@ -1228,15 +1234,15 @@ public:
     void update(float deltaTime) {
 
         // 만든 케이크가 주문과 일치하는지 판별
-        if ((flavor[random_flavor] == flavor[0] && check_cream) || (flavor[random_flavor] == flavor[1] && check_chocolate)) {
+        if ((flavor[currentOrder.flavor] == flavor[0] && check_cream) || (flavor[currentOrder.flavor] == flavor[1] && check_chocolate)) {
             // 맛이 일치
             check_order_flavor = true;
         }
-        if ((random_topping == 0 && check_strawberry) || (random_topping == 1 && check_cherry)) {
+        if ((currentOrder.topping == 0 && check_strawberry) || (currentOrder.topping == 1 && check_cherry)) {
             // 토핑이 일치
             check_order_topping = true;
         }
-        if (stoi(topping_num[random_topping_num]) == check_toppingNum) {
+        if (stoi(topping_num[currentOrder.toppingNum]) == check_toppingNum) {
             // 토핑 갯수가 일치
             check_order_toppingNum = true;
         }
@@ -1273,9 +1279,9 @@ public:
 
         // 손님 말풍선이 다 나온다음
         if ((oder_balloonAlpha >= 255)) {
-            flavorText.setString(flavor[random_flavor]);
-            toppingText.setString(topping[random_topping]);
-            topping_numText.setString(topping_num[random_topping_num]);
+            flavorText.setString(flavor[currentOrder.flavor]);
+            toppingText.setString(topping[currentOrder.topping]);
+            topping_numText.setString(topping_num[currentOrder.toppingNum]);
             sumScore();
             score.setString(to_string(Score));
             text4.setString(L"이 케이크는");
