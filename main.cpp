@@ -17,26 +17,57 @@ enum class GameState {
     ResultScreen
 };
 
+
+// 케이크, 주문자의 정보를 가지고있는 배열
 wstring flavor[] = { L"생크림", L"초콜릿" };
 wstring topping[] = { L"딸기", L"체리" };
 string topping_num[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
 int gender[] = { 1, 2 };
+
+// 랜덤으로 주문을 받을 수 있게하는 변수
 int random_gender = 0;
 int random_flavor, random_topping, random_topping_num;
 int customer = 1;
 
-// 손님이 주문한 케이크를 판단
+// main 함수에서 update를 위해 필요한 변수
+bool characterShown = false;
+bool cream = false;
+bool chocolate = false;
+bool strawberry = false;
+bool cherry = false;
+bool moveLeft = false;
+bool moveRight = false;
+
+// 손님이 주문한 케이크를 판단하는 변수
 bool check_order_flavor = false;
 bool check_order_topping = false;
 bool check_order_toppingNum = false;
 int Score = 0;
 
-// 사용자가 만든 케이크를 판단
+// 사용자가 만든 케이크를 판단하는 변수
 bool check_cream = false;
 bool check_chocolate = false;
 bool check_strawberry = false;
 bool check_cherry = false;
 int check_toppingNum = 1;
+
+// 게임 재시작을 위해 변수를 초기화하는 메서드
+void resetGame(void) {
+    characterShown = false;
+    cream = false;
+    chocolate = false;
+    strawberry = false;
+    cherry = false;
+    check_cream = false;
+    check_chocolate = false;
+    check_strawberry = false;
+    check_cherry = false;
+    check_toppingNum = 1;
+    check_order_flavor = false;
+    check_order_topping = false;
+    check_order_toppingNum = false;
+    Score = 0;
+}
 
 // 시작화면 클래스
 class StartScreen {
@@ -103,7 +134,7 @@ private:
 // 주문 화면 클래스
 class OrderScreen {
 public:
-    OrderScreen() {
+    OrderScreen() : gen(random_device{}()), two(0, 1), top(0, 7) {
 
         if (!backgroundTexture.loadFromFile("Images/Order_Seen.png")) {
             cout << "Failed to load background image" << endl;
@@ -129,25 +160,6 @@ public:
         uniform_int_distribution<int> two(0, 1);
         uniform_int_distribution<int> top(0, 7);
 
-        random_gender = two(gen);
-        random_flavor = two(gen);
-        random_topping = two(gen);
-        random_topping_num = top(gen);
-
-        // 손님 이미지 (0: 남자, 1: 여자)
-        if (random_gender == 0) {
-            if (!characterTexture.loadFromFile("Images/male.png")) {
-                cout << "Failed to load male character image" << endl;
-            }
-        }
-        else {
-            if (!characterTexture.loadFromFile("Images/female.png")) {
-                cout << "Failed to load female character image" << endl;
-            }
-        }
-        characterSprite.setTexture(characterTexture);
-        characterSprite.setPosition(250.f, 756.f);
-
         // 주문 말풍선 이미지
         if (!balloonTexture.loadFromFile("Images/Text_Balloon.png")) {
             cout << "Failed to load Text Balloon image" << endl;
@@ -169,57 +181,15 @@ public:
             cout << "Failed to load font" << endl;
         }
 
-        // 토핑 (딸기, 체리)
+        // 텍스트들의 폰트 초기화
         toppingText.setFont(font);
-        toppingText.setString(topping[random_topping]);
-        toppingText.setCharacterSize(100);          // 글자 크기 설정
-        toppingText.setFillColor(Color::Red);       // 글자 색상
-        toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
-
         text1.setFont(font);
-        text1.setString(L"가 들어간 케이크가 먹고 싶어요!");
-        text1.setCharacterSize(96);
-        text1.setFillColor(Color::Black);
-        text1.setPosition(445.f, 292.f);
-
-        // 맛 (생크림, 초콜릿)
         flavorText.setFont(font);
-        flavorText.setString(flavor[random_flavor]);
-        flavorText.setCharacterSize(100);
-        flavorText.setFillColor(Color::Blue);
-        flavorText.setPosition(300.f, 470.f);   // 생크림
-
         text2.setFont(font);
-        text2.setString(L" 케이크에 ");
-        text2.setCharacterSize(96);
-        text2.setFillColor(Color::Black);
-        text2.setPosition(570.f, 474.f);
-
-        // 토핑 갯수 (1 ~ 8)
         topping_numText.setFont(font);
-        topping_numText.setString(topping_num[random_topping_num]);
-        topping_numText.setCharacterSize(100);
-        topping_numText.setFillColor(Color::Red);
-        topping_numText.setPosition(970.f, 470.f);
-
         text3.setFont(font);
-        text3.setString(L"개 올려주세요!");
-        text3.setCharacterSize(96);
-        text3.setFillColor(Color::Black);
-        text3.setPosition(1042.f, 474.f);
-
-        // 답변 (오케이, 나가주세요)
         yes_answer.setFont(font);
-        yes_answer.setString(L"오케이");
-        yes_answer.setCharacterSize(95);
-        yes_answer.setFillColor(Color::Black);
-        yes_answer.setPosition(2067.f, 1131.f);
-
         no_answer.setFont(font);
-        no_answer.setString(L"나가주세요");
-        no_answer.setCharacterSize(95);
-        no_answer.setFillColor(Color::Black);
-        no_answer.setPosition(1985.f, 1386.f);
 
         // 주문화면 배경음악
         if (!orderSoundBuffer.loadFromFile("Music/main.mp3")) {
@@ -228,6 +198,43 @@ public:
         orderSound.setBuffer(orderSoundBuffer);
         orderSound.setLoop(true);
         orderSound.setVolume(50);
+    }
+
+    void new_order(void) {
+
+        // 말풍선 투명도 초기화
+        oder_balloonAlpha = 0.0f;
+        answer_balloonAlpha = 0.0f;
+
+        // 텍스트를 투명하게 바꿈
+        toppingText.setFillColor(Color(255, 255, 255, 0));
+        text1.setFillColor(Color(255, 255, 255, 0));
+        flavorText.setFillColor(Color(255, 255, 255, 0));
+        text2.setFillColor(Color(255, 255, 255, 0));
+        topping_numText.setFillColor(Color(255, 255, 255, 0));
+        text3.setFillColor(Color(255, 255, 255, 0));
+        yes_answer.setFillColor(Color(255, 255, 255, 0));
+        no_answer.setFillColor(Color(255, 255, 255, 0));
+
+        // 손님의 정보와, 주문받을 케이크의 정보를 랜덤으로 설정
+        random_gender = two(gen);
+        random_flavor = two(gen);
+        random_topping = two(gen);
+        random_topping_num = top(gen);
+
+        // 손님 이미지를 랜덤으로 설정 (0: 남자, 1: 여자)
+        if (random_gender == 0) {
+            if (!characterTexture.loadFromFile("Images/male.png")) {
+                cout << "Failed to load male character image" << endl;
+            }
+        }
+        else {
+            if (!characterTexture.loadFromFile("Images/female.png")) {
+                cout << "Failed to load female character image" << endl;
+            }
+        }
+        characterSprite.setTexture(characterTexture);
+        characterSprite.setPosition(250.f, 756.f);
     }
 
     void update(float deltaTime) {
@@ -240,6 +247,68 @@ public:
                 startAnswerBalloonFadeIn();
             }
             oder_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(oder_balloonAlpha)));
+            characterSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(oder_balloonAlpha)));
+        }
+
+        // 말풍선이 완전히 표시된 후 텍스트 그리기
+        if (oder_balloonAlpha >= 255) {
+            // 토핑 (딸기, 체리)
+            toppingText.setString(topping[random_topping]);
+            toppingText.setCharacterSize(100);          // 글자 크기 설정
+            toppingText.setFillColor(Color::Red);       // 글자 색상
+            toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
+            text1.setString(L"가 들어간 케이크가 먹고 싶어요!");
+            text1.setCharacterSize(96);
+            text1.setFillColor(Color::Black);
+            text1.setPosition(445.f, 292.f);
+
+            // 맛 (생크림, 초콜릿)
+            flavorText.setString(flavor[random_flavor]);
+            flavorText.setCharacterSize(100);
+            flavorText.setFillColor(Color::Blue);
+            flavorText.setPosition(300.f, 470.f);   // 생크림
+            text2.setString(L" 케이크에 ");
+            text2.setCharacterSize(96);
+            text2.setFillColor(Color::Black);
+            text2.setPosition(570.f, 474.f);
+
+            // 토핑 갯수 (1 ~ 8)
+            topping_numText.setString(topping_num[random_topping_num]);
+            topping_numText.setCharacterSize(100);
+            topping_numText.setFillColor(Color::Red);
+            topping_numText.setPosition(970.f, 470.f);
+            text3.setString(L"개 올려주세요!");
+            text3.setCharacterSize(96);
+            text3.setFillColor(Color::Black);
+            text3.setPosition(1042.f, 474.f);// 토핑 (딸기, 체리)
+            toppingText.setString(topping[random_topping]);
+            toppingText.setCharacterSize(100);          // 글자 크기 설정
+            toppingText.setFillColor(Color::Red);       // 글자 색상
+            toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
+            text1.setString(L"가 들어간 케이크가 먹고 싶어요!");
+            text1.setCharacterSize(96);
+            text1.setFillColor(Color::Black);
+            text1.setPosition(445.f, 292.f);
+
+            // 맛 (생크림, 초콜릿)
+            flavorText.setString(flavor[random_flavor]);
+            flavorText.setCharacterSize(100);
+            flavorText.setFillColor(Color::Blue);
+            flavorText.setPosition(300.f, 470.f);   // 생크림
+            text2.setString(L" 케이크에 ");
+            text2.setCharacterSize(96);
+            text2.setFillColor(Color::Black);
+            text2.setPosition(570.f, 474.f);
+
+            // 토핑 갯수 (1 ~ 8)
+            topping_numText.setString(topping_num[random_topping_num]);
+            topping_numText.setCharacterSize(100);
+            topping_numText.setFillColor(Color::Red);
+            topping_numText.setPosition(970.f, 470.f);
+            text3.setString(L"개 올려주세요!");
+            text3.setCharacterSize(96);
+            text3.setFillColor(Color::Black);
+            text3.setPosition(1042.f, 474.f);
         }
 
         // 대답 말풍선 페이드인
@@ -247,6 +316,19 @@ public:
             answer_balloonAlpha += 220 * deltaTime;
             if (answer_balloonAlpha > 255) answer_balloonAlpha = 255;
             answer_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(answer_balloonAlpha)));
+        }
+
+        if (answer_balloonAlpha >= 255) {
+            // 답변 (오케이, 나가주세요)
+            yes_answer.setString(L"오케이");
+            yes_answer.setCharacterSize(95);
+            yes_answer.setFillColor(Color::Black);
+            yes_answer.setPosition(2067.f, 1131.f);
+
+            no_answer.setString(L"나가주세요");
+            no_answer.setCharacterSize(95);
+            no_answer.setFillColor(Color::Black);
+            no_answer.setPosition(1985.f, 1386.f);
         }
 
     }
@@ -257,21 +339,14 @@ public:
         window.draw(characterSprite);
         window.draw(oder_balloonSprite);
         window.draw(answer_balloonSprite);
-
-        // 말풍선이 완전히 표시된 후 텍스트 그리기
-        if (oder_balloonAlpha >= 255) {
-            window.draw(toppingText);
-            window.draw(text1);
-            window.draw(flavorText);
-            window.draw(text2);
-            window.draw(topping_numText);
-            window.draw(text3);
-        }
-
-        if (answer_balloonAlpha >= 255) {
-            window.draw(yes_answer);
-            window.draw(no_answer);
-        }
+        window.draw(toppingText);
+        window.draw(text1);
+        window.draw(flavorText);
+        window.draw(text2);
+        window.draw(topping_numText);
+        window.draw(text3);
+        window.draw(yes_answer);
+        window.draw(no_answer);
 
     }
 
@@ -310,6 +385,10 @@ private:
     Texture answer_balloonTexture;
     Sprite answer_balloonSprite;
     Text answerText;
+    // 난수 관련 변수
+    mt19937 gen;
+    uniform_int_distribution<int> two;
+    uniform_int_distribution<int> top;
     RectangleShape yesAnswerButton; // "오케이" 버튼
     RectangleShape noAnswerButton;  // "나가주세요" 버튼
     float oder_balloonAlpha = 0.0f;
@@ -368,12 +447,6 @@ public:
         moveRightButton.setPosition(2477.f, 1425.f);
         moveRightButton.setFillColor(Color(0, 0, 0, 0));
 
-        // 이동 버튼 위치 확인용
-        moveLeftButton.setOutlineThickness(2.f);
-        moveLeftButton.setOutlineColor(Color::Green);
-        moveRightButton.setOutlineThickness(2.f);
-        moveRightButton.setOutlineColor(Color::Red);
-
         // 폰트 로드
         if (!font.loadFromFile("Fonts/JejuGothic.ttf")) {
             cout << "Failed to load font" << endl;
@@ -420,6 +493,15 @@ public:
         screenText.setCharacterSize(100);
         screenText.setFillColor(Color::White);
         screenText.setPosition(900.f, 261.f);
+
+    }
+
+    // 케이크 상태 초기화
+    virtual void new_cake() {
+
+        // 옵션 선택 이벤트 초기화
+        option1hoverSprite.setColor(Color(255, 255, 255, 0));
+        option2hoverSprite.setColor(Color(255, 255, 255, 0));
 
     }
 
@@ -507,6 +589,21 @@ public:
 
         screenText.setString(L"맛을 골라주세요!");
         screenText.setPosition(1100.f, 261.f);
+
+    }
+
+    void new_cake() override {
+
+        // 옵션 선택 이벤트 초기화
+        option1hoverSprite.setColor(Color(255, 255, 255, 0));
+        option2hoverSprite.setColor(Color(255, 255, 255, 0));
+
+        // 케이크 이미지 투명도 변경
+        creamflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+        chocolateflavorcakeSprite.setColor(Color(255, 255, 255, 0));
+
+        // 기본 케이크 시트 보이기
+        cakeSprite.setColor(Color(255, 255, 255, 255));
 
     }
 
@@ -623,6 +720,22 @@ public:
         cherrytoppingSprite.setTexture(cherrytoppingTexture);
         cherrytoppingSprite.setPosition(1360.f, 899.f);
         cherrytoppingSprite.setColor(Color(255, 255, 255, 255));
+    }
+
+    void new_cake() override {
+
+        // 옵션 선택 이벤트 초기화
+        option1hoverSprite.setColor(Color(255, 255, 255, 0));
+        option2hoverSprite.setColor(Color(255, 255, 255, 0));
+
+        // 토핑 이미지 투명도 변경
+        strawberrytoppingSprite.setColor(Color(255, 255, 255, 0));
+        cherrytoppingSprite.setColor(Color(255, 255, 255, 0));
+
+        // 지정했던 맛의 케이크 보이게 하기
+        if (check_cream) creamcake();
+        if (check_chocolate) chocolatecake();
+
     }
 
     void update(float deltaTime) {
@@ -1073,17 +1186,43 @@ public:
 
     }
 
+    // 케이크의 점수 지정
     void sumScore(void) {
         if (check_order_toppingNum)
+            // 토핑 갯수만 일치하는 경우
             Score = 20;
         if (check_order_flavor || check_order_topping)
+            // 맛이나 토핑이 일치하는 경우
             Score = 40;
         if ((check_order_flavor && check_order_toppingNum) || (check_order_topping && check_order_toppingNum))
+            // 맛과 토핑갯수가 일치하거나 토핑 종류와 갯수가 일치하는 경우
             Score = 60;
         if (check_order_flavor && check_order_topping)
+            // 맛과 토핑이 일치하는 경우
             Score = 80;
         if (check_order_flavor && check_order_topping && check_order_toppingNum)
+            // 주문을 정확이 만든 경우
             Score = 100;
+    }
+
+    void new_result(void) {
+
+        // 말풍선 투명도 초기화
+        oder_balloonAlpha = 0.0f;
+        answer_balloonAlpha = 0.0f;
+
+        // 텍스트를 투명하게 바꿈
+        toppingText.setFillColor(Color(255, 255, 255, 0));
+        flavorText.setFillColor(Color(255, 255, 255, 0));
+        topping_numText.setFillColor(Color(255, 255, 255, 0));
+        score.setFillColor(Color(255, 255, 255, 0));
+        text1.setFillColor(Color(255, 255, 255, 0));
+        text2.setFillColor(Color(255, 255, 255, 0));
+        text3.setFillColor(Color(255, 255, 255, 0));
+        text4.setFillColor(Color(255, 255, 255, 0));
+        text5.setFillColor(Color(255, 255, 255, 0));
+        again_answer.setFillColor(Color(255, 255, 255, 0));
+        stop_answer.setFillColor(Color(255, 255, 255, 0));
     }
 
     void update(float deltaTime) {
@@ -1142,7 +1281,7 @@ public:
             text4.setString(L"이 케이크는");
             text4.setCharacterSize(96);
             text4.setFillColor(Color::Black);
-            text4.setPosition(461.f, 556.f);
+            text4.setPosition(461.f, 550.f);
             text5.setString(L"점이에요!");
 
             // 손님의 주문과 일치여부에 따라 텍스트 설정 
@@ -1150,96 +1289,99 @@ public:
                 // 케이크 맛이 일치하는 경우
                 flavorText.setCharacterSize(100);
                 flavorText.setFillColor(Color::Blue);
-                flavorText.setPosition(566.f, 261.f);
+                flavorText.setPosition(566.f, 255.f);
                 text1.setString(L"맛 케이크에");
                 text1.setCharacterSize(96);
                 text1.setFillColor(Color::Black);
-                text1.setPosition(832.f, 261.f);
+                text1.setPosition(832.f, 255.f);
             }
             else {
                 // 케이크 맛이 일치하지 않는 경우
                 flavorText.setCharacterSize(100);
                 flavorText.setFillColor(Color::Blue);
-                flavorText.setPosition(431.f, 261.f);
+                flavorText.setPosition(431.f, 255.f);
                 text1.setString(L"맛 케이크가 아니고...");
                 text1.setCharacterSize(96);
                 text1.setFillColor(Color::Black);
-                text1.setPosition(697.f, 261.f);
+                text1.setPosition(697.f, 255.f);
             }
 
             if (check_order_topping) {
                 // 케이크 토핑만 일치하는 경우
                 toppingText.setCharacterSize(100);
                 toppingText.setFillColor(Color::Red);
-                toppingText.setPosition(419.f, 400.f);
+                toppingText.setPosition(419.f, 394.f);
                 text2.setString(L"가");
                 text2.setCharacterSize(96);
                 text2.setFillColor(Color::Black);
-                text2.setPosition(599.f, 408.f);
+                text2.setPosition(599.f, 402.f);
                 topping_numText.setCharacterSize(100);
                 topping_numText.setFillColor(Color::Red);
-                topping_numText.setPosition(713.f, 408.f);
+                topping_numText.setPosition(713.f, 394.f);
                 text3.setString(L"개 안 들어가있네요");
                 text3.setCharacterSize(96);
                 text3.setFillColor(Color::Black);
-                text3.setPosition(776.f, 408.f);
+                text3.setPosition(776.f, 402.f);
             }
             if (check_order_topping && check_order_toppingNum) {
                 // 케이크 토핑과 갯수가 일치하는 경우
                 toppingText.setCharacterSize(100);
                 toppingText.setFillColor(Color::Red);
-                toppingText.setPosition(419.f, 400.f);
+                toppingText.setPosition(419.f, 394.f);
                 text2.setString(L"가");
                 text2.setCharacterSize(96);
                 text2.setFillColor(Color::Black);
-                text2.setPosition(599.f, 408.f);
+                text2.setPosition(599.f, 402.f);
                 topping_numText.setCharacterSize(100);
                 topping_numText.setFillColor(Color::Red);
-                topping_numText.setPosition(713.f, 408.f);
+                topping_numText.setPosition(713.f, 394.f);
                 text3.setString(L"개 잘 들어가있네요!");
                 text3.setCharacterSize(96);
                 text3.setFillColor(Color::Black);
-                text3.setPosition(776.f, 408.f);
+                text3.setPosition(776.f, 402.f);
             }
             else {
                 // 주문한 토핑이 안 들어간 경우
                 toppingText.setCharacterSize(100);
                 toppingText.setFillColor(Color::Red);
-                toppingText.setPosition(419.f, 400.f);
+                toppingText.setPosition(419.f, 394.f);
                 text2.setString(L"가");
                 text2.setCharacterSize(96);
                 text2.setFillColor(Color::Black);
-                text2.setPosition(599.f, 408.f);
+                text2.setPosition(599.f, 402.f);
+                topping_numText.setCharacterSize(100);
+                topping_numText.setFillColor(Color::Red);
+                topping_numText.setPosition(713.f, 394.f);
                 text3.setString(L"개 안 들어갔고");
                 text3.setCharacterSize(96);
                 text3.setFillColor(Color::Black);
-                text3.setPosition(770.f, 408.f);
+                text3.setPosition(770.f, 402.f);
             }
 
             // 점수
             if (Score == 100) {
                 score.setCharacterSize(100);
                 score.setFillColor(Color::Magenta);
-                score.setPosition(954.f, 556.f);
+                score.setPosition(954.f, 550.f);
                 text5.setCharacterSize(96);
                 text5.setFillColor(Color::Black);
-                text5.setPosition(1131.f, 556.f);
+                text5.setPosition(1131.f, 550.f);
             }
             else if (Score == 0) {
                 score.setCharacterSize(100);
                 score.setFillColor(Color::Magenta);
-                score.setPosition(1009.f, 556.f);
+                score.setPosition(1009.f, 550.f);
                 text5.setCharacterSize(96);
                 text5.setFillColor(Color::Black);
-                text5.setPosition(1080.f, 556.f);
+                text5.setPosition(1080.f, 550.f);
             }
             else {
                 score.setCharacterSize(100);
                 score.setFillColor(Color::Magenta);
-                score.setPosition(961.f, 556.f);
+                score.setPosition(961.f, 550.f);
                 text5.setCharacterSize(96);
                 text5.setFillColor(Color::Black);
-                text5.setPosition(1091.f, 556.f);
+                text5.setPosition(1091.f, 550.f);
             }
 
         }
@@ -1258,7 +1400,7 @@ public:
             again_answer.setString(L"다시하기");
             again_answer.setCharacterSize(95);
             again_answer.setFillColor(Color::Black);
-            again_answer.setPosition(2010.f, 1120.f);
+            again_answer.setPosition(2010.f, 1131.f);
             stop_answer.setFont(font);
             stop_answer.setString(L"그만하기");
             stop_answer.setCharacterSize(95);
@@ -1352,18 +1494,6 @@ int main() {
     ChoseToppingNumScreen chosetoppingnumScreen;
     ResultScreen resultScreen;
 
-    // oderscreen
-    bool characterShown = false;
-    // choseflavorscreen
-    bool cream = false;
-    bool chocolate = false;
-    // chosetoppingscreen
-    bool strawberry = false;
-    bool cherry = false;
-    // 모두 사용
-    bool moveLeft = false;
-    bool moveRight = false;
-
     while (window.isOpen()) {
         Event event;
         while (window.pollEvent(event)) {
@@ -1382,6 +1512,8 @@ int main() {
                         orderScreen.playSound();
                         gameState = GameState::OrderScreen;
                         characterShown = true;
+                        orderScreen.new_order();
+                        choseflavorScreen.new_cake();
                     }
                     break;
                 case GameState::OrderScreen:
@@ -1393,10 +1525,9 @@ int main() {
                     else if ( orderScreen.isNoAnswerPressed(mousePos)) {
                         // 주문을 거절한 경우
                         cout << "Pressed Oder No Button!" << endl;
-                        gameState = GameState::StartScreen;
-                        orderScreen.stopSound();
-                        startScreen.playSound();
-                        characterShown = false;
+                        resetGame();
+                        orderScreen.new_order();
+                        choseflavorScreen.new_cake();
                     }
                     break;
                 case GameState::ChoseFlavorScreen:
@@ -1412,9 +1543,11 @@ int main() {
                         chocolate = true;
                         cream = false;
                     }
-                    if (makingScreen.moveRightButtonPressed(mousePos))
+                    if (makingScreen.moveRightButtonPressed(mousePos)) {
                         // 오른쪽 버튼을 이용해 화면을 전환한 경우
                         gameState = GameState::ChoseToppingScreen;
+                        chosetoppingScreen.new_cake();
+                    }
                     break;
                 case GameState::ChoseToppingScreen:
                     if (chosetoppingScreen.strawberryButtonPressed(mousePos)) {
@@ -1436,11 +1569,13 @@ int main() {
                     break;
                 case GameState::ChoseToppingNumScreen:
                     if (chosetoppingnumScreen.plusButtonPressed(mousePos)) {
+                        // 토핑 갯수를 증가시킴
                         if (check_toppingNum < 8)
                             check_toppingNum++;
                         cout << "ToppingNum : " << check_toppingNum << endl;
                     }
                     if (chosetoppingnumScreen.minusButtonPressed(mousePos)) {
+                        // 토핑 갯수를 감소시킴
                         if (check_toppingNum > 1)
                             check_toppingNum--;
                         cout << "ToppingNum : " << check_toppingNum << endl;
@@ -1448,17 +1583,27 @@ int main() {
                     if (makingScreen.moveRightButtonPressed(mousePos))
                         // 오른쪽 버튼을 이용해 화면을 전환한 경우
                         gameState = GameState::ResultScreen;
+                        resultScreen.new_result();
                         characterShown = true;
                     if (makingScreen.moveLeftButtonPressed(mousePos))
                         // 왼쪽 버튼을 이용해 화면을 전환한 경우
                         gameState = GameState::ChoseToppingScreen;
                     break;
                 case GameState::ResultScreen:
-
                     if (resultScreen.AgainButtonPressed(mousePos)) {
+                        // 다시하기 버튼을 눌렀을 때 주문관련 변수를 초기화 시키고, 주문을 새로 받음
+                        cout << "Pressed Again Button!" << check_toppingNum << endl;
+                        resetGame();
+                        orderScreen.new_order();
+                        choseflavorScreen.new_cake();
                         gameState = GameState::OrderScreen;
                     }
                     else if (resultScreen.StopButtonPressed(mousePos)) {
+                        // 그만하기 버튼을 눌렀을 때 주문관련 변수를 초기화 시키고, 시작화면으로 이동함
+                        cout << "Pressed Stop Button!" << check_toppingNum << endl;
+                        orderScreen.stopSound();
+                        startScreen.playSound();
+                        resetGame();
                         gameState = GameState::StartScreen;
                     }
                     break;
