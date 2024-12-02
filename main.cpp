@@ -20,7 +20,7 @@ enum class GameState {
 // 케이크, 주문자의 정보를 가지고있는 배열
 wstring flavor[] = { L"생크림", L"초콜릿" };
 wstring topping[] = { L"딸기", L"체리" };
-string topping_num[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
+wstring topping_num[] = { L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8" };
 
 // main 함수에서 update를 위해 필요한 변수
 bool characterShown = false;
@@ -229,7 +229,7 @@ public:
         no_answer.setFillColor(Color(255, 255, 255, 0));
 
         // 손님의 정보와, 주문받을 케이크의 정보를 랜덤으로 설정
-        currentOrder.gender = two(gen); // 0: 남자, 1: 여자
+        currentOrder.gender = two(gen);
         currentOrder.flavor = two(gen);
         currentOrder.topping = two(gen);
         currentOrder.toppingNum = top(gen);
@@ -265,62 +265,16 @@ public:
         // 말풍선이 완전히 표시된 후 텍스트 그리기
         if (oder_balloonAlpha >= 255) {
             // 토핑 (딸기, 체리)
-            toppingText.setString(topping[currentOrder.topping]);
-            toppingText.setCharacterSize(100);          // 글자 크기 설정
-            toppingText.setFillColor(Color::Red);       // 글자 색상
-            toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
-            text1.setString(L"가 들어간 케이크가 먹고 싶어요!");
-            text1.setCharacterSize(96);
-            text1.setFillColor(Color::Black);
-            text1.setPosition(445.f, 292.f);
+            setText(toppingText, topping[currentOrder.topping], 100, Color::Red, { 260.f, 291.f });
+            setText(text1, L"가 들어간 케이크가 먹고 싶어요!", 96, Color::Black, { 445.f, 292.f });
 
             // 맛 (생크림, 초콜릿)
-            flavorText.setString(flavor[currentOrder.flavor]);
-            flavorText.setCharacterSize(100);
-            flavorText.setFillColor(Color::Blue);
-            flavorText.setPosition(300.f, 470.f);   // 생크림
-            text2.setString(L" 케이크에 ");
-            text2.setCharacterSize(96);
-            text2.setFillColor(Color::Black);
-            text2.setPosition(570.f, 474.f);
+            setText(flavorText, flavor[currentOrder.flavor], 100, Color::Blue, { 300.f, 470.f });
+            setText(text2, L" 케이크에 ", 96, Color::Black, { 570.f, 474.f });
 
             // 토핑 갯수 (1 ~ 8)
-            topping_numText.setString(topping_num[currentOrder.toppingNum]);
-            topping_numText.setCharacterSize(100);
-            topping_numText.setFillColor(Color::Red);
-            topping_numText.setPosition(970.f, 470.f);
-            text3.setString(L"개 올려주세요!");
-            text3.setCharacterSize(96);
-            text3.setFillColor(Color::Black);
-            text3.setPosition(1042.f, 474.f);// 토핑 (딸기, 체리)
-            toppingText.setString(topping[currentOrder.topping]);
-            toppingText.setCharacterSize(100);          // 글자 크기 설정
-            toppingText.setFillColor(Color::Red);       // 글자 색상
-            toppingText.setPosition(260.f, 291.f);      // 텍스트 위치 설정
-            text1.setString(L"가 들어간 케이크가 먹고 싶어요!");
-            text1.setCharacterSize(96);
-            text1.setFillColor(Color::Black);
-            text1.setPosition(445.f, 292.f);
-
-            // 맛 (생크림, 초콜릿)
-            flavorText.setString(flavor[currentOrder.flavor]);
-            flavorText.setCharacterSize(100);
-            flavorText.setFillColor(Color::Blue);
-            flavorText.setPosition(300.f, 470.f);   // 생크림
-            text2.setString(L" 케이크에 ");
-            text2.setCharacterSize(96);
-            text2.setFillColor(Color::Black);
-            text2.setPosition(570.f, 474.f);
-
-            // 토핑 갯수 (1 ~ 8)
-            topping_numText.setString(topping_num[currentOrder.toppingNum]);
-            topping_numText.setCharacterSize(100);
-            topping_numText.setFillColor(Color::Red);
-            topping_numText.setPosition(970.f, 470.f);
-            text3.setString(L"개 올려주세요!");
-            text3.setCharacterSize(96);
-            text3.setFillColor(Color::Black);
-            text3.setPosition(1042.f, 474.f);
+            setText(topping_numText, topping_num[currentOrder.toppingNum], 100, Color::Red, { 970.f, 470.f });
+            setText(text3, L"개 올려주세요!", 96, Color::Black, { 1042.f, 474.f });
         }
 
         // 대답 말풍선 페이드인
@@ -332,15 +286,8 @@ public:
 
         if (answer_balloonAlpha >= 255) {
             // 답변 (오케이, 나가주세요)
-            yes_answer.setString(L"오케이");
-            yes_answer.setCharacterSize(95);
-            yes_answer.setFillColor(Color::Black);
-            yes_answer.setPosition(2067.f, 1131.f);
-
-            no_answer.setString(L"나가주세요");
-            no_answer.setCharacterSize(95);
-            no_answer.setFillColor(Color::Black);
-            no_answer.setPosition(1985.f, 1386.f);
+            setText(yes_answer, L"오케이", 95, Color::Black, { 2067.f, 1131.f });
+            setText(no_answer, L"나가주세요", 95, Color::Black, { 1985.f, 1386.f });
         }
 
     }
@@ -501,11 +448,7 @@ public:
 
         // 화면 텍스트
         screenText.setFont(font);
-        screenText.setString(L"케이크 만들기 화면입니다!");
-        screenText.setCharacterSize(100);
-        screenText.setFillColor(Color::White);
-        screenText.setPosition(900.f, 261.f);
-
+        setText(screenText, L"케이크 만들기 화면입니다!", 100, Color::White, { 900.f, 261.f });
     }
 
     // 케이크 상태 초기화
@@ -1297,115 +1240,55 @@ public:
 
         // 손님 말풍선이 다 나온다음
         if ((oder_balloonAlpha >= 255)) {
-            flavorText.setString(flavor[currentOrder.flavor]);
-            toppingText.setString(topping[currentOrder.topping]);
-            topping_numText.setString(topping_num[currentOrder.toppingNum]);
             sumScore();
-            score.setString(to_string(Score));
-            text4.setString(L"이 케이크는");
-            text4.setCharacterSize(96);
-            text4.setFillColor(Color::Black);
-            text4.setPosition(461.f, 550.f);
-            text5.setString(L"점이에요!");
+            setText(text4, L"이 케이크는", 96, Color::Black, { 461.f, 550.f });
 
             // 손님의 주문과 일치여부에 따라 텍스트 설정 
             if (check_order_flavor) {
                 // 케이크 맛이 일치하는 경우
-                flavorText.setCharacterSize(100);
-                flavorText.setFillColor(Color::Blue);
-                flavorText.setPosition(566.f, 255.f);
-                text1.setString(L"맛 케이크에");
-                text1.setCharacterSize(96);
-                text1.setFillColor(Color::Black);
-                text1.setPosition(832.f, 255.f);
+                setText(flavorText, flavor[currentOrder.flavor], 100, Color::Blue, { 566.f, 255.f });
+                setText(text1, L"맛 케이크에", 96, Color::Black, { 832.f, 255.f });
             }
             else {
                 // 케이크 맛이 일치하지 않는 경우
-                flavorText.setCharacterSize(100);
-                flavorText.setFillColor(Color::Blue);
-                flavorText.setPosition(431.f, 255.f);
-                text1.setString(L"맛 케이크가 아니고...");
-                text1.setCharacterSize(96);
-                text1.setFillColor(Color::Black);
-                text1.setPosition(697.f, 255.f);
+                setText(flavorText, flavor[currentOrder.flavor], 100, Color::Blue, { 431.f, 255.f });
+                setText(text1, L"맛 케이크가 아니고...", 96, Color::Black, { 697.f, 255.f });
             }
 
             if (check_order_topping) {
                 // 케이크 토핑만 일치하는 경우
-                toppingText.setCharacterSize(100);
-                toppingText.setFillColor(Color::Red);
-                toppingText.setPosition(419.f, 394.f);
-                text2.setString(L"가");
-                text2.setCharacterSize(96);
-                text2.setFillColor(Color::Black);
-                text2.setPosition(599.f, 402.f);
-                topping_numText.setCharacterSize(100);
-                topping_numText.setFillColor(Color::Red);
-                topping_numText.setPosition(713.f, 394.f);
-                text3.setString(L"개 안 들어가있네요");
-                text3.setCharacterSize(96);
-                text3.setFillColor(Color::Black);
-                text3.setPosition(776.f, 402.f);
+                setText(toppingText, topping[currentOrder.topping], 100, Color::Red, { 419.f, 394.f });
+                setText(text2, L"가", 96, Color::Black, { 599.f, 402.f });
+                setText(topping_numText, topping_num[currentOrder.toppingNum], 100, Color::Red, { 713.f, 394.f });
+                setText(text3, L"개 안 들어가있네요", 96, Color::Black, { 776.f, 402.f });
             }
             if (check_order_topping && check_order_toppingNum) {
                 // 케이크 토핑과 갯수가 일치하는 경우
-                toppingText.setCharacterSize(100);
-                toppingText.setFillColor(Color::Red);
-                toppingText.setPosition(419.f, 394.f);
-                text2.setString(L"가");
-                text2.setCharacterSize(96);
-                text2.setFillColor(Color::Black);
-                text2.setPosition(599.f, 402.f);
-                topping_numText.setCharacterSize(100);
-                topping_numText.setFillColor(Color::Red);
-                topping_numText.setPosition(713.f, 394.f);
-                text3.setString(L"개 잘 들어가있네요!");
-                text3.setCharacterSize(96);
-                text3.setFillColor(Color::Black);
-                text3.setPosition(776.f, 402.f);
+                setText(toppingText, topping[currentOrder.topping], 100, Color::Red, { 419.f, 394.f });
+                setText(text2, L"가", 96, Color::Black, { 599.f, 402.f });
+                setText(topping_numText, topping_num[currentOrder.toppingNum], 100, Color::Red, { 713.f, 394.f });
+                setText(text3, L"개 잘 들어가있네요!", 96, Color::Black, { 776.f, 402.f });
             }
             else {
                 // 주문한 토핑이 안 들어간 경우
-                toppingText.setCharacterSize(100);
-                toppingText.setFillColor(Color::Red);
-                toppingText.setPosition(419.f, 394.f);
-                text2.setString(L"가");
-                text2.setCharacterSize(96);
-                text2.setFillColor(Color::Black);
-                text2.setPosition(599.f, 402.f);
-                topping_numText.setCharacterSize(100);
-                topping_numText.setFillColor(Color::Red);
-                topping_numText.setPosition(713.f, 394.f);
-                text3.setString(L"개 안 들어갔고");
-                text3.setCharacterSize(96);
-                text3.setFillColor(Color::Black);
-                text3.setPosition(770.f, 402.f);
+                setText(toppingText, topping[currentOrder.topping], 100, Color::Red, { 419.f, 394.f });
+                setText(text2, L"가", 96, Color::Black, { 599.f, 402.f });
+                setText(topping_numText, topping_num[currentOrder.toppingNum], 100, Color::Red, { 713.f, 394.f });
+                setText(text3, L"개 안 들어갔고", 96, Color::Black, { 776.f, 402.f });
             }
 
             // 점수
             if (Score == 100) {
-                score.setCharacterSize(100);
-                score.setFillColor(Color::Magenta);
-                score.setPosition(954.f, 550.f);
-                text5.setCharacterSize(96);
-                text5.setFillColor(Color::Black);
-                text5.setPosition(1131.f, 550.f);
+                setText(score, to_wstring(Score), 100, Color::Magenta, { 954.f, 550.f });
+                setText(text5, L"점이에요!", 96, Color::Black, { 1131.f, 550.f });
             }
             else if (Score == 0) {
-                score.setCharacterSize(100);
-                score.setFillColor(Color::Magenta);
-                score.setPosition(1009.f, 550.f);
-                text5.setCharacterSize(96);
-                text5.setFillColor(Color::Black);
-                text5.setPosition(1080.f, 550.f);
+                setText(score, to_wstring(Score), 100, Color::Magenta, { 1009.f, 550.f });
+                setText(text5, L"점이에요!", 96, Color::Black, { 1080.f, 550.f });
             }
             else {
-                score.setCharacterSize(100);
-                score.setFillColor(Color::Magenta);
-                score.setPosition(961.f, 550.f);
-                text5.setCharacterSize(96);
-                text5.setFillColor(Color::Black);
-                text5.setPosition(1091.f, 550.f);
+                setText(score, to_wstring(Score), 100, Color::Magenta, { 961.f, 550.f });
+                setText(text5, L"점이에요!", 96, Color::Black, { 1091.f, 550.f });
             }
 
         }
