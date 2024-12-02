@@ -17,12 +17,10 @@ enum class GameState {
     ResultScreen
 };
 
-
 // 케이크, 주문자의 정보를 가지고있는 배열
 wstring flavor[] = { L"생크림", L"초콜릿" };
 wstring topping[] = { L"딸기", L"체리" };
 string topping_num[] = { "1", "2", "3", "4", "5", "6", "7", "8" };
-int gender[] = { 1, 2 };
 
 // main 함수에서 update를 위해 필요한 변수
 bool characterShown = false;
@@ -73,6 +71,14 @@ void resetGame(void) {
     check_order_topping = false;
     check_order_toppingNum = false;
     Score = 0;
+}
+
+// 텍스트 설정 메서드
+void setText(Text& text, const wstring& content, int size, Color color, Vector2f position) {
+    text.setString(content);
+    text.setCharacterSize(size);
+    text.setFillColor(color);
+    text.setPosition(position);
 }
 
 // 시작화면 클래스
@@ -1247,6 +1253,17 @@ public:
             check_order_toppingNum = true;
         }
 
+        // 손님 이미지를 랜덤으로 설정 (0: 남자, 1: 여자)
+        if (currentOrder.gender == 0) {
+            if (!characterTexture.loadFromFile("Images/male.png")) {
+                cout << "Failed to load male character image" << endl;
+            }
+        }
+        else {
+            if (!characterTexture.loadFromFile("Images/female.png")) {
+                cout << "Failed to load female character image" << endl;
+            }
+        }
         characterSprite.setTexture(characterTexture);
         characterSprite.setPosition(250.f, 756.f);
 
@@ -1267,6 +1284,7 @@ public:
             answer_balloonSprite.setColor(Color(255, 255, 255, static_cast<Uint8>(answer_balloonAlpha)));
         }
 
+        // 텍스트 폰트 초기화
         flavorText.setFont(font);
         toppingText.setFont(font);
         topping_numText.setFont(font);
@@ -1481,8 +1499,6 @@ private:
     Text text5;                 // "점이에요!"
     Text again_answer;          // "다시하기"
     Text stop_answer;           // "그만하기"
-    SoundBuffer orderSoundBuffer;
-    Sound orderSound;
     const Vector2u windowSize = { 2880, 1800 };
 };
 
