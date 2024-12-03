@@ -1304,15 +1304,9 @@ public:
             stopButton.setFillColor(Color(0, 0, 0, 0));
             // 답변 (다시하기, 그만하기)
             again_answer.setFont(font);
-            again_answer.setString(L"다시하기");
-            again_answer.setCharacterSize(95);
-            again_answer.setFillColor(Color::Black);
-            again_answer.setPosition(2010.f, 1131.f);
             stop_answer.setFont(font);
-            stop_answer.setString(L"그만하기");
-            stop_answer.setCharacterSize(95);
-            stop_answer.setFillColor(Color::Black);
-            stop_answer.setPosition(2010.f, 1386.f);
+            setText(again_answer, L"다시하기", 95, Color::Black, { 2010.f, 1131.f });
+            setText(stop_answer, L"그만하기", 95, Color::Black, { 2010.f, 1386.f });
         }
 
     }
@@ -1505,7 +1499,7 @@ int main() {
                     }
                     else if (resultScreen.StopButtonPressed(mousePos)) {
                         // 그만하기 버튼을 눌렀을 때 주문관련 변수를 초기화 시키고, 시작화면으로 이동함
-                        cout << "Pressed Stop Button!" << check_toppingNum << endl;
+                        cout << "Pressed Stop Button!" << endl;
                         orderScreen.stopSound();
                         startScreen.playSound();
                         resetGame();
